@@ -171,7 +171,7 @@
         <div class="text-xs text-blue-100 mt-1">Essential plan features plus</div>
         <ul class="mt-3 space-y-2 text-sm">
           <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">30 custom groups</span></li>
-          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">3 months of history for free, then paid unlimited history</span></li>
+          <li class="flex gap-2" data-history="pro"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2" data-history-text="pro">3 months of history for free, then paid unlimited history</span></li>
           <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">Automated product verification</span></li>
           <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">QuickBooks locations and Sage dimensions support</span></li>
           <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">2 premium integrations</span></li>
@@ -449,13 +449,14 @@ function setBilling(next) {
   document.querySelectorAll('[data-billing]').forEach(el => el.textContent = label);
 
   const eligible = (billing === 'yearly');
-  ['basic','essential'].forEach(plan => {
+  const defaultCopy = { basic: 'Paid unlimited history', essential: 'Paid unlimited history', pro: '3 months of history for free, then paid unlimited history' };
+  ['basic','essential','pro'].forEach(plan => {
     const text = document.querySelector(`[data-history-text="${plan}"]`);
     if (!text) return;
     if (eligible) {
       text.innerHTML = '<span class="text-emerald-700 font-semibold">1 year of historical data — free</span>';
     } else {
-      text.textContent = 'Paid unlimited history';
+      text.textContent = defaultCopy[plan];
     }
   });
 
