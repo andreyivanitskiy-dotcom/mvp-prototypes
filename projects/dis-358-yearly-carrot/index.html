@@ -13,7 +13,7 @@
     <a href="../../" class="text-sm text-blue-600 hover:underline">← MVP Prototypes</a>
     <h1 class="text-3xl font-bold text-slate-900 mt-4">DIS-358 — Free 1yr historical data for yearly plans</h1>
     <p class="text-slate-600 mt-3">
-      Trial users on Basic &amp; Essential see a time-boxed offer: subscribe to a yearly plan and get <span class="font-semibold">1 full year of historical data imported for free</span>. The mock explores three promotional surfaces — a pricing badge and two in-app banners with a 24h countdown — to lift PLG yearly conversion without changing the core plan structure.
+      Offer free import of one full year of historical data to Trial users at the Trial &amp; Purchase stages, in exchange for switching from monthly to a yearly plan. The prototype below explores three promotional surfaces — one pricing badge and two in-app banners with a 24h countdown — that carry that offer to the user.
     </p>
 
     <a href="mock/" class="mt-8 block bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition">
@@ -30,61 +30,48 @@
     <div class="mt-12">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">1. What this idea is about</h2>
       <p class="text-sm text-slate-600">
-        Give first-time trial users a concrete, quantifiable reason to pick <em>yearly</em> over <em>monthly</em>: free import of one full year of historical transactions — an add-on that today costs $30 per 500 transactions and is a real friction point for accountants who need past periods synced. The offer is scoped to <strong>Basic &amp; Essential</strong> (the PLG plans) and gated behind a <strong>24-hour window from trial start</strong>, so the incentive doubles as an activation urgency lever.
+        Offer "Free 1 year of historical import" for Trial users with less than 1M annual revenue, at the Trial &amp; Purchase stages, to increase conversion to Yearly plans. The idea is framed in the Jira card as one of the measures for higher conversion of PLG traffic to yearly.
       </p>
+      <p class="text-xs text-slate-500 italic mt-2">Source: DIS-358 §1 "The Idea (1 sentence)".</p>
     </div>
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">2. Who is the target</h2>
       <p class="text-sm text-slate-600">
-        <strong>PLG trial users on Basic or Essential</strong> — the plans this experiment targets for higher yearly conversion.
+        <strong>PLG users with annual revenue under 1M, who are NOT Accountants in Practice.</strong> The card lists both new and existing users under "Affects".
       </p>
       <p class="text-xs text-slate-500 mt-2">
-        Eligibility as scoped in the Jira card: annual revenue up to 1M, no AIPs, within the first 24 hours of trial, subscribing to a yearly plan.
+        Estimated reach: ~54% of monthly Purchase events are made by &lt;1M ARR users (source: Mixpanel report linked in card §2). Additional eligibility scoping: available only if the user subscribes to a yearly plan today, within the first 24 hours; verification with Val and Aris is still pending per the card.
       </p>
     </div>
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">3. End goal(s)</h2>
       <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-        <li><strong>Primary metric:</strong> Yearly / Total purchase ratio ↑ — <strong>target 50%+</strong> (fluctuation fine), per the Jira card. Tracked in the two linked Mixpanel reports on the card.</li>
-        <li><strong>Downstream:</strong> LTV lift — yearly cohorts have shown lower churn than monthly in earlier snapshots, so a shifted cohort mix compounds retention.</li>
-        <li><strong>Guardrail:</strong> churn on newly-converted yearly subs must not spike — a promo that pulls in wrong-fit users would erode the gain via refunds.</li>
-        <li><strong>Second-order:</strong> softens historical-data support load (already sanity-checked with Renata) by resolving the ask up-front instead of via ticket.</li>
+        <li><strong>Primary strategic anchor:</strong> New Yearly MRR — moves both the Monthly/Yearly purchase ratio and New MRR (card §5).</li>
+        <li><strong>Secondary:</strong> churn ↓ in the long run — approximated via secondary signals (card §5).</li>
+        <li><strong>Falsifiable success signal:</strong> ratio Purchase Yearly / Purchase overall, direction ↑, target <strong>50%+</strong> (fluctuation fine) — measurable today via Mixpanel (card §9 + top of card).</li>
       </ul>
     </div>
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">4. Mechanism &amp; logic</h2>
-      <ol class="list-decimal list-inside text-sm text-slate-600 space-y-2">
-        <li>
-          <strong>Trigger.</strong> New trial starts → a 24h clock starts. Only Basic/Essential yearly plans qualify for the free-history unlock.
-        </li>
-        <li>
-          <strong>Surface layer.</strong> User sees the offer in up to three places (each tested independently in the mock):
-          <ul class="list-disc list-inside ml-5 mt-1 space-y-1">
-            <li><em>Pricing page badge</em> — a green pill under the "Pay yearly" toggle: "Includes 1 year of historical data for free — Subscribe Now!" with the countdown. Cheapest surface, catches anyone who reaches pricing.</li>
-            <li><em>In-app banner above header</em> — full-width promo strip on the transactions page, permanent and center-aligned, with the countdown timer. Maximum visibility.</li>
-            <li><em>In-app banner below existing trial banner</em> — sits between the standing "0 days trial" banner and the app header. Stacks with existing UI without displacing it — safer roll-out.</li>
-          </ul>
-        </li>
-        <li>
-          <strong>Conversion path.</strong> Any CTA click deep-links to checkout with yearly Basic/Essential pre-selected and the free-history flag attached to the subscription record.
-        </li>
-        <li>
-          <strong>Fulfillment.</strong> On subscription, backend enqueues a historical import job spanning the prior 12 months, capped to the plan's transaction limit. Support handles the same as a paid import; the only difference is the invoice line item.
-        </li>
-        <li>
-          <strong>Why yearly-only.</strong> Free history has to be recouped somewhere. Yearly's built-in 12-month commitment gives Synder a full retention window to earn back the import cost. Monthly buyers could churn after month 1 with a year of imported data, so they're excluded from the promo (they see the standard "Paid unlimited history" line).
-        </li>
-        <li>
-          <strong>Why 24 hours.</strong> Loss-aversion is stronger than gain-seeking; a visible countdown converts the choice from "should I upgrade?" into "am I willing to lose this?" — and prevents indefinite deferral of the switch decision.
-        </li>
+      <p class="text-sm text-slate-600 mb-2">The causal chain, quoted from card §3 "Mechanism (Causality Test)":</p>
+      <ol class="list-decimal list-inside text-sm text-slate-600 space-y-1.5">
+        <li><em>If</em> we do free 1 year of historical import for Yearly Subscription…</li>
+        <li><em>Then</em> the yearly plan will look more attractive to new PLG users…</li>
+        <li><em>Which causes</em> the number of yearly subscriptions to move.</li>
       </ol>
+      <p class="text-sm text-slate-600 mt-4 mb-2">The card explicitly lists two assumptions that have to hold for the chain not to collapse:</p>
+      <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
+        <li>Users need historical import for that long (i.e. a full year, not less).</li>
+        <li>Users are fine with paying yearly within a limited time window (24 hours).</li>
+      </ul>
+      <p class="text-xs text-slate-500 italic mt-3">Source: DIS-358 §3 "Mechanism (Causality Test)".</p>
     </div>
 
     <div class="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
-      <span class="font-semibold">Open questions ahead of challenge:</span> (1) is the 24h window supported by activation-funnel data, or arbitrary? (2) do &lt;1M ARR trial users actually ask for 12 months of history, or is that mostly an AIP/mid-market ask? (3) SLG bleed-through tripwire — what % of free-history claims by SLG-eligible accounts would trigger a rethink?
+      <span class="font-semibold">Open items ahead of challenge</span> (from the card itself, not additions): (1) "Verify with Val and Aris" on the historical-syncs eligibility spec — not yet done per the card; (2) sections 2, 3, and 8 still have unresolved template checkboxes (Niche/Meaningful/Broad, Automatic/User-enabled/Support-assisted/Sales-led, Setup/Day-to-day/Month-end) — need to be committed to one option each; (3) SLG-cohort banner exposure — flagged as an adoption risk in §6, mitigation is "warn Aris", no metric tripwire yet.
     </div>
   </div>
   <footer class="text-center text-xs text-slate-400 py-6">Powered by Isaac 🫏</footer>

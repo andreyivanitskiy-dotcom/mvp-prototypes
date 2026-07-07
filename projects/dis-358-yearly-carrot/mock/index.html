@@ -210,7 +210,7 @@
 
   <!-- Bottom banner -->
   <section id="bottom-banner" class="mt-10 bg-blue-50 rounded-2xl py-8 px-6 text-center">
-    <h3 id="banner-title" class="text-blue-700 font-semibold text-lg">Basic &amp; Essential yearly subs get 1 year of history — free</h3>
+    <h3 id="banner-title" class="text-blue-700 font-semibold text-lg">Yearly subscribers get 1 year of history — free</h3>
     <p id="banner-body" class="text-sm text-slate-600 mt-2 max-w-2xl mx-auto">
       Need more than a year? Additional history is $30 per 500 transactions. The more you sync, the less per transaction.
     </p>
@@ -463,7 +463,7 @@ function setBilling(next) {
   document.getElementById('variant-A-badge').style.display = eligible ? '' : 'none';
 
   if (eligible) {
-    document.getElementById('banner-title').textContent = 'Basic & Essential yearly subs get 1 year of history — free';
+    document.getElementById('banner-title').textContent = 'Yearly subscribers get 1 year of history — free';
     document.getElementById('banner-body').textContent  = 'Need more than a year? Additional history is $30 per 500 transactions. The more you sync, the less per transaction.';
   } else {
     document.getElementById('banner-title').textContent = 'Have historical transactions? Get custom pricing!';
