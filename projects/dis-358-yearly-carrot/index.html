@@ -70,9 +70,108 @@
       <p class="text-xs text-slate-500 italic mt-3">Source: DIS-358 §3 "Mechanism (Causality Test)".</p>
     </div>
 
-    <div class="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
-      <span class="font-semibold">Open items ahead of challenge</span> (from the card itself, not additions): (1) "Verify with Val and Aris" on the historical-syncs eligibility spec — not yet done per the card; (2) sections 2, 3, and 8 still have unresolved template checkboxes (Niche/Meaningful/Broad, Automatic/User-enabled/Support-assisted/Sales-led, Setup/Day-to-day/Month-end) — need to be committed to one option each; (3) SLG-cohort banner exposure — flagged as an adoption risk in §6, mitigation is "warn Aris", no metric tripwire yet.
+    <div class="mt-10">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold text-slate-900">Items ahead of challenge <span id="open-count" class="text-xs text-slate-500 font-normal ml-1"></span></div>
+        <button id="toggle-resolved" class="text-xs text-slate-500 hover:text-slate-800 underline">Show only open</button>
+      </div>
+      <ul id="challenge-items" class="space-y-2 text-sm">
+        <li data-item="verify-val-aris" data-resolved="true" class="challenge-li flex items-start gap-2 p-3 rounded-lg border">
+          <button class="resolve-btn shrink-0 mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center" aria-label="Toggle resolved">
+            <svg class="check-icon w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <div class="flex-1">
+            <div class="item-title">"Verify with Val and Aris" on the historical-syncs eligibility spec (Version current OR version B).</div>
+          </div>
+        </li>
+        <li data-item="template-checkboxes" data-resolved="true" class="challenge-li flex items-start gap-2 p-3 rounded-lg border">
+          <button class="resolve-btn shrink-0 mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center" aria-label="Toggle resolved">
+            <svg class="check-icon w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <div class="flex-1">
+            <div class="item-title">Card §2, §3, §8 have unresolved template checkboxes (Niche/Meaningful/Broad, Automatic/User-enabled/Support-assisted/Sales-led, Setup/Day-to-day/Month-end) — need one option committed per axis.</div>
+          </div>
+        </li>
+        <li data-item="slg-tripwire" data-resolved="true" class="challenge-li flex items-start gap-2 p-3 rounded-lg border">
+          <button class="resolve-btn shrink-0 mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center" aria-label="Toggle resolved">
+            <svg class="check-icon w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <div class="flex-1">
+            <div class="item-title">SLG-cohort banner exposure — flagged as an adoption risk in card §6; mitigation is "warn Aris", no metric tripwire spec'd.</div>
+          </div>
+        </li>
+      </ul>
     </div>
+    <script>
+      (function() {
+        const STORAGE_KEY = 'dis358_challenge_items';
+        const items = document.querySelectorAll('#challenge-items .challenge-li');
+        const openCount = document.getElementById('open-count');
+        const toggleBtn = document.getElementById('toggle-resolved');
+        let hideResolved = false;
+
+        // Load persisted state
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          items.forEach(li => {
+            const key = li.dataset.item;
+            if (key in saved) li.dataset.resolved = String(saved[key]);
+          });
+        } catch (e) { /* ignore */ }
+
+        function saveState() {
+          const state = {};
+          items.forEach(li => { state[li.dataset.item] = li.dataset.resolved === 'true'; });
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+        }
+
+        function render() {
+          let open = 0;
+          items.forEach(li => {
+            const resolved = li.dataset.resolved === 'true';
+            const title = li.querySelector('.item-title');
+            const btn = li.querySelector('.resolve-btn');
+            const icon = li.querySelector('.check-icon');
+            if (resolved) {
+              li.classList.remove('bg-amber-50', 'border-amber-200');
+              li.classList.add('bg-emerald-50', 'border-emerald-200');
+              title.classList.add('line-through', 'text-slate-500');
+              title.classList.remove('text-amber-900');
+              btn.classList.remove('border-amber-400', 'bg-white', 'text-transparent');
+              btn.classList.add('bg-emerald-600', 'border-emerald-600', 'text-white');
+              icon.style.opacity = '1';
+              btn.title = 'Resolved — click to reopen';
+              li.style.display = hideResolved ? 'none' : '';
+            } else {
+              open++;
+              li.classList.add('bg-amber-50', 'border-amber-200');
+              li.classList.remove('bg-emerald-50', 'border-emerald-200');
+              title.classList.remove('line-through', 'text-slate-500');
+              title.classList.add('text-amber-900');
+              btn.classList.add('border-amber-400', 'bg-white');
+              btn.classList.remove('bg-emerald-600', 'border-emerald-600', 'text-white');
+              icon.style.opacity = '0';
+              btn.title = 'Click to mark resolved';
+              li.style.display = '';
+            }
+          });
+          const total = items.length;
+          const resolved = total - open;
+          openCount.textContent = `(${resolved}/${total} resolved)`;
+          toggleBtn.textContent = hideResolved ? 'Show all' : 'Show only open';
+        }
+
+        items.forEach(li => {
+          li.querySelector('.resolve-btn').addEventListener('click', () => {
+            li.dataset.resolved = li.dataset.resolved === 'true' ? 'false' : 'true';
+            saveState();
+            render();
+          });
+        });
+        toggleBtn.addEventListener('click', () => { hideResolved = !hideResolved; render(); });
+        render();
+      })();
+    </script>
   </div>
   <footer class="text-center text-xs text-slate-400 py-6">Powered by Isaac 🫏</footer>
 </body>
