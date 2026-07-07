@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DIS-358 — Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .check { color: #2563eb; }
+  .x-mark { color: #9ca3af; }
+  .app-font { font-family: 'Roboto', system-ui, sans-serif; }
+  .view { display: none; }
+  .view.active { display: block; }
+  /* Custom scrollbar-like sidebar item styles */
+  .sb-item { color: #555; display: flex; align-items: center; gap: 10px; padding: 10px 15px; font-size: 14px; cursor: pointer; }
+  .sb-item:hover { background: #eee; }
+  .sb-item.active { background: #007AFF; color: #fff; position: relative; }
+  .sb-item.active svg { color: #fff !important; fill: #fff !important; }
+  .sb-item.active::before { content: ""; position: absolute; top: 14px; right: -6px; width: 11px; height: 11px; background: #007AFF; transform: rotate(45deg); }
+  .sub-item { padding-left: 45px; font-size: 13px; }
+  /* Offer banner gradient */
+  .offer-banner {
+    background: linear-gradient(90deg, #10b981 0%, #059669 50%, #047857 100%);
+    color: #fff;
+  }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- Prototype toggle (small, top of page) -->
+<div class="bg-slate-900 text-white text-xs sticky top-0 z-[9999]">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-2">
+    <span class="text-slate-400">Prototype view:</span>
+    <button data-view="1" class="view-btn px-3 py-1 rounded bg-blue-600 hover:bg-blue-500">1 — Pricing (variant A)</button>
+    <button data-view="2" class="view-btn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">2 — Banner above header</button>
+    <button data-view="3" class="view-btn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">3 — Banner below trial banner</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 1 — Pricing page, variant A only                         -->
+<!-- ============================================================ -->
+<div id="view-1" class="view active">
+<main class="max-w-6xl mx-auto px-6 py-12">
+  <h1 class="text-center text-3xl font-semibold text-slate-900">Choose your plan</h1>
+
+  <!-- Billing toggle -->
+  <div class="mt-8 flex flex-col items-center">
+    <div class="relative inline-flex items-center bg-slate-100 rounded-full p-1">
+      <button id="toggle-monthly" class="toggle-btn px-5 py-2 rounded-full text-sm font-medium text-slate-500">Pay monthly</button>
+      <button id="toggle-yearly" class="toggle-btn px-5 py-2 rounded-full text-sm font-medium text-white bg-blue-600 relative">
+        Pay yearly
+        <span class="absolute -top-3 -right-3 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">20% OFF</span>
+      </button>
+    </div>
+
+    <!-- Variant A badge (always shown here — only Variant A in this prototype) -->
+    <div id="variant-A-badge" class="mt-4">
+      <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span>Includes 1 year of historical data for free — Subscribe Now!</span>
+        <span class="offer-timer inline-flex items-center gap-0.5 font-mono font-bold bg-emerald-600 text-white rounded px-1.5 py-0.5 tabular-nums">
+          <span data-h>23</span><span>:</span><span data-m>59</span><span>:</span><span data-s>59</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan cards -->
+  <section class="mt-10 grid grid-cols-1 md:grid-cols-4 gap-5">
+
+    <!-- BASIC -->
+    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+      <h2 class="text-2xl font-semibold text-slate-900">Basic</h2>
+      <p class="text-slate-500 text-sm mt-1">Basic sync tools included.</p>
+      <div class="mt-10">
+        <div class="flex items-baseline justify-center">
+          <span class="text-5xl font-bold text-slate-900" data-price="basic">$52</span>
+          <span class="text-slate-500 ml-1">month</span>
+        </div>
+        <div class="text-center text-xs text-slate-500 mt-2" data-billing="basic">Billed yearly</div>
+      </div>
+      <div class="text-center text-sm text-slate-600 mt-4">up to 500 sales transactions/mo</div>
+      <button data-sub="basic" class="sub-btn mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition">Subscribe</button>
+      <div class="mt-6">
+        <div class="text-sm font-semibold text-slate-900">Key features</div>
+        <ul class="mt-3 space-y-2 text-sm text-slate-700">
+          <li class="flex gap-2"><span class="check">✓</span>10 custom groups</li>
+          <li class="flex gap-2"><span class="check">✓</span>2 integration slots</li>
+          <li class="flex gap-2" data-history="basic">
+            <span class="check">✓</span><span data-history-text="basic">Paid unlimited history</span>
+          </li>
+          <li class="flex gap-2"><span class="check">✓</span>Multicurrency</li>
+          <li class="flex gap-2"><span class="check">✓</span>Items tracking</li>
+          <li class="flex gap-2"><span class="check">✓</span>Balance reconciliation</li>
+          <li class="flex gap-2 text-slate-400"><span class="x-mark">✕</span>Live chat support</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ESSENTIAL -->
+    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+      <h2 class="text-2xl font-semibold text-slate-900">Essential</h2>
+      <p class="text-slate-500 text-sm mt-1">Ideal for expanding businesses.</p>
+      <div class="mt-10">
+        <div class="flex items-baseline justify-center">
+          <span class="text-sm text-slate-500 mr-1">from</span>
+          <span class="text-5xl font-bold text-slate-900" data-price="essential">$92</span>
+          <span class="text-slate-500 ml-1">month</span>
+        </div>
+        <div class="text-center text-xs text-slate-500 mt-2" data-billing="essential">Billed yearly</div>
+      </div>
+      <div class="mt-4">
+        <div class="text-xs text-slate-600 mb-1">Sales transactions a month</div>
+        <button class="w-full text-left text-sm bg-white border border-slate-300 rounded-md px-3 py-2 flex items-center justify-between">
+          <span>up to 1,000 transactions/mo</span>
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+      </div>
+      <button data-sub="essential" class="sub-btn mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition">Subscribe</button>
+      <div class="mt-6">
+        <div class="text-sm font-semibold text-slate-900">Key features</div>
+        <div class="text-xs text-slate-500 mt-1">Basic plan features plus</div>
+        <ul class="mt-3 space-y-2 text-sm text-slate-700">
+          <li class="flex gap-2"><span class="check">✓</span>20 custom groups</li>
+          <li class="flex gap-2"><span class="check">✓</span>Unlimited integration slots</li>
+          <li class="flex gap-2" data-history="essential">
+            <span class="check">✓</span><span data-history-text="essential">Paid unlimited history</span>
+          </li>
+          <li class="flex gap-2"><span class="check">✓</span>Open invoices tracking</li>
+          <li class="flex gap-2"><span class="check">✓</span>COGS tracking</li>
+          <li class="flex gap-2"><span class="check">✓</span>QuickBooks classes and Xero tracking categories support</li>
+          <li class="flex gap-2 text-slate-400"><span class="x-mark">✕</span>Live chat support</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- PRO -->
+    <article class="bg-blue-600 text-white rounded-2xl shadow-md p-6 flex flex-col relative">
+      <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Most Popular</span>
+      <h2 class="text-2xl font-semibold">Pro</h2>
+      <p class="text-blue-100 text-sm mt-1">Perfect fit for thriving multi-channel businesses.</p>
+      <div class="mt-4 flex items-center justify-center gap-3 text-sm">
+        <span class="font-semibold">Standard</span>
+        <div class="w-10 h-5 bg-blue-800 rounded-full flex items-center px-0.5">
+          <div class="w-4 h-4 bg-white rounded-full"></div>
+        </div>
+        <span class="text-blue-200">Max</span>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-baseline justify-center">
+          <span class="text-sm text-blue-200 mr-1">from</span>
+          <span class="text-5xl font-bold" data-price="pro">$220</span>
+          <span class="text-blue-200 ml-1">month</span>
+        </div>
+        <div class="text-center text-xs text-blue-200 mt-2" data-billing="pro">Billed yearly</div>
+      </div>
+      <div class="mt-4">
+        <div class="text-xs text-blue-100 mb-1">Sales transactions a month</div>
+        <button class="w-full text-left text-sm bg-blue-700 border border-blue-500 rounded-md px-3 py-2 flex items-center justify-between text-white">
+          <span>up to 10,000 transactions/mo</span>
+          <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+      </div>
+      <button class="mt-5 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2.5 rounded-lg transition">Subscribe</button>
+      <div class="mt-6">
+        <div class="text-sm font-semibold">Key features</div>
+        <div class="text-xs text-blue-100 mt-1">Essential plan features plus</div>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">30 custom groups</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">3 months of history for free, then paid unlimited history</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">Automated product verification</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">QuickBooks locations and Sage dimensions support</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">2 premium integrations</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">Discount on other Synder products</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">Zoom onboarding services</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">1 custom data modification</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">Synder Expert help on request</span></li>
+          <li class="flex gap-2"><span>✓</span><span class="underline decoration-blue-300 underline-offset-2">RevRec with up to 1k subscriptions</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- PREMIUM -->
+    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+      <h2 class="text-2xl font-semibold text-slate-900">Premium</h2>
+      <p class="text-slate-500 text-sm mt-1">Advanced features for complex needs.</p>
+      <div class="mt-10 flex justify-center">
+        <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      </div>
+      <div class="text-center text-sm text-slate-600 mt-4">Custom pricing for your company</div>
+      <button class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition">Talk to sales</button>
+      <div class="mt-6">
+        <div class="text-sm font-semibold text-slate-900">Key features</div>
+        <div class="text-xs text-slate-500 mt-1">Pro plan features plus</div>
+        <ul class="mt-3 space-y-2 text-sm text-slate-700">
+          <li class="flex gap-2"><span class="check">✓</span>Unlimited custom groups</li>
+          <li class="flex gap-2"><span class="check">✓</span>Free unlimited history</li>
+          <li class="flex gap-2"><span class="check">✓</span>RevRec with up to 5k subscriptions</li>
+          <li class="flex gap-2"><span class="check">✓</span>Paid custom development</li>
+          <li class="flex gap-2"><span class="check">✓</span>Unlimited Zoom onboarding and ongoing support</li>
+        </ul>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- Bottom banner -->
+  <section id="bottom-banner" class="mt-10 bg-blue-50 rounded-2xl py-8 px-6 text-center">
+    <h3 id="banner-title" class="text-blue-700 font-semibold text-lg">Basic &amp; Essential yearly subs get 1 year of history — free</h3>
+    <p id="banner-body" class="text-sm text-slate-600 mt-2 max-w-2xl mx-auto">
+      Need more than a year? Additional history is $30 per 500 transactions. The more you sync, the less per transaction.
+    </p>
+    <button class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-2 rounded-lg">Contact us</button>
+  </section>
+</main>
+</div><!-- /view-1 -->
+
+
+<!-- ============================================================ -->
+<!-- Shared: Platform transactions app shell (reused in views 2, 3) -->
+<!-- ============================================================ -->
+<template id="tpl-app-shell">
+<!-- Full-width white nav -->
+<div class="w-full bg-white border-b border-[#c8c7cc]" style="min-height:56px;">
+  <div class="flex items-center min-h-[56px]">
+    <!-- Org selector -->
+    <div class="w-[230px] flex items-center px-3 border-r border-[#c8c7cc] bg-[#F6F6F6] min-h-[56px]">
+      <div class="w-8 h-8 rounded-full bg-[#8B2A5F] text-white flex items-center justify-center text-sm font-semibold mr-3">TE</div>
+      <div class="flex-1 text-sm">test</div>
+      <svg class="w-4 h-4 text-[#007AFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-5 pr-6">
+      <div class="text-sm text-[#555]">Trial syncs : <strong class="text-[#007AFF] text-lg">20</strong></div>
+      <svg class="w-6 h-6 text-[#007AFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      <div class="w-7 h-7 rounded-full border-2 border-[#007AFF] text-[#007AFF] flex items-center justify-center text-sm font-bold">?</div>
+      <svg class="w-6 h-6 text-[#007AFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    </div>
+  </div>
+</div>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside class="w-[230px] bg-[#F6F6F6] border-r border-[#c8c7cc] min-h-[calc(100vh-56px)]">
+    <div class="sb-item">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M7 7h14V5H7v2zm0 6h14v-2H7v2zm0 6h14v-2H7v2zM3 8l3-3-3-3v6zm0 6l3-3-3-3v6zm0 6l3-3-3-3v6z"/></svg>
+      Transactions
+      <svg class="w-4 h-4 ml-auto" style="color:#007AFF" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+    </div>
+    <div class="sb-item sub-item active">
+      <svg class="w-4 h-4" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M3 3h18v2H3zM3 8h18v2H3zM3 13h18v2H3zM3 18h18v2H3z"/></svg>
+      Platform transactions
+    </div>
+    <div class="sb-item sub-item">
+      <svg class="w-4 h-4" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+      Import activity log
+    </div>
+    <div class="sb-item sub-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-4 h-4" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+      Transaction reconciliation
+      <span class="ml-2 text-[10px] font-semibold text-[#1F8940] bg-[#DDF5C7] px-1.5 py-0.5 rounded">New</span>
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v2H2V5a1 1 0 011-1h4zM2 9h20v11a2 2 0 01-2 2H4a2 2 0 01-2-2V9z"/></svg>
+      Invoicing
+      <svg class="w-4 h-4 ml-auto" style="color:#007AFF" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-4 4 4 5-5"/></svg>
+      Financials
+      <svg class="w-4 h-4 ml-auto" style="color:#007AFF" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    <div style="height:20px"></div>
+    <div class="sb-item" style="border-top:1px solid #c8c7cc; border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 018.5 12 3.5 3.5 0 0112 8.5a3.5 3.5 0 013.5 3.5 3.5 3.5 0 01-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46a.5.5 0 00-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.507.507 0 0014 2h-4a.507.507 0 00-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1a.5.5 0 00-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.31.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.05.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg>
+      Settings
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#007AFF" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#007AFF"/></svg>
+      AI Agents
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
+      What's New
+    </div>
+    <div class="sb-item" style="border-bottom:1px solid #c8c7cc;">
+      <svg class="w-5 h-5" style="fill:#007AFF" viewBox="0 0 24 24"><path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h16v4H4z"/></svg>
+      Custom development
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-4 min-h-[calc(100vh-56px)] app-font">
+    <h1 class="text-2xl font-normal text-[#1A1B24]">Platform transactions</h1>
+    <p class="text-sm text-[#6B778C] mt-1">View the list of transactions imported from connected platforms and their sync status to Synder.</p>
+
+    <!-- Blue info panel -->
+    <div class="mt-3 bg-[#E0EBFD] p-6 rounded">
+      <div class="text-base font-medium text-[#1A1B24] mb-3">No transactions were found in the last 30 days in connected integrations. You can:</div>
+      <div class="flex flex-col gap-2">
+        <div class="text-[#0053CC] text-sm flex items-center gap-1 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          Connect all integrations
+        </div>
+        <div class="text-[#0053CC] text-sm flex items-center gap-1 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          Import historical transactions
+        </div>
+        <div class="text-[#0053CC] text-sm flex items-center gap-1 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          Set up an account for the upcoming transactions
+        </div>
+        <div class="text-[#0053CC] text-sm flex items-center gap-1 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          Talk to our support team
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions row -->
+    <div class="mt-6 flex items-center gap-3">
+      <button class="bg-[#0053CC] text-white text-sm font-medium px-4 py-2 rounded flex items-center gap-2">Actions <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+      <button class="text-sm text-[#0053CC] border border-[#0053CC] px-4 py-2 rounded">Select all transactions</button>
+      <button class="text-sm text-[#0053CC] border border-[#0053CC] px-4 py-2 rounded">Reset all filters</button>
+      <div class="flex-1"></div>
+      <input placeholder="Search" class="text-sm border border-[#DFE4EC] rounded px-3 py-2 w-48">
+      <button class="text-sm text-[#0053CC] border border-[#0053CC] px-4 py-2 rounded">Import historical data</button>
+    </div>
+
+    <div class="mt-3 text-[#0053CC] text-sm cursor-pointer">▸ Advanced search</div>
+
+    <!-- Table -->
+    <div class="mt-4 bg-white border border-[#DFE4EC] rounded overflow-hidden">
+      <div class="grid grid-cols-[40px_1fr_180px_120px_220px_180px_60px] items-center bg-[#F6F6F6] p-3 text-sm text-[#6B778C] font-medium border-b border-[#DFE4EC]">
+        <div><input type="checkbox"></div>
+        <div class="text-center">Transaction info</div>
+        <div class="text-center">
+          <div>Transaction type</div>
+          <select class="mt-1 text-xs w-full border border-[#DFE4EC] rounded px-2 py-1"><option>All types</option></select>
+        </div>
+        <div class="text-center">Amount</div>
+        <div class="text-center">
+          <div>Transaction date</div>
+          <input value="2026-04-09 - 2026-07-07" class="mt-1 text-xs w-full border border-[#DFE4EC] rounded px-2 py-1">
+        </div>
+        <div class="text-center">
+          <div>Sync status</div>
+          <select class="mt-1 text-xs w-full border border-[#DFE4EC] rounded px-2 py-1"><option>All statuses</option></select>
+        </div>
+        <div class="text-center">Action</div>
+      </div>
+      <div class="p-8 text-center text-sm text-[#6B778C]">
+        No transactions have yet been imported from the connected payment provider(-s). <a class="text-[#0053CC] underline" href="#">Why is my transaction list empty?</a>
+      </div>
+    </div>
+
+    <div class="mt-3 flex items-center justify-between text-sm text-[#6B778C]">
+      <div>Showing 0 to 0 of 0 transactions</div>
+      <div class="flex items-center gap-2">
+        <select class="border border-[#DFE4EC] rounded px-2 py-1 text-sm"><option>25</option></select>
+        <button class="border border-[#DFE4EC] rounded px-3 py-1 text-sm">Previous</button>
+        <button class="border border-[#DFE4EC] rounded px-3 py-1 text-sm">Next</button>
+      </div>
+    </div>
+  </main>
+</div>
+</template>
+
+<!-- Shared: offer banner template -->
+<template id="tpl-offer-banner">
+<div class="offer-banner w-full text-center py-3 px-4">
+  <div class="flex items-center justify-center gap-3 flex-wrap">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+    <span class="font-semibold text-base">Subscribe to Yearly now and get 1 year of history FOR FREE!</span>
+    <span class="text-xs opacity-90">Offer ends in</span>
+    <span class="offer-timer inline-flex items-center gap-1 font-mono font-bold bg-white/20 rounded px-2 py-1 text-sm tabular-nums">
+      <span data-h>23</span><span>:</span><span data-m>59</span><span>:</span><span data-s>59</span>
+    </span>
+  </div>
+</div>
+</template>
+
+<!-- Shared: existing trial banner template -->
+<template id="tpl-trial-banner">
+<div class="w-full bg-[#E0EBFD] text-[#0053CC] text-sm py-3 px-6 flex items-center justify-center gap-6">
+  <span>You have <strong>0 days</strong> of your free trial. Subscribe to automate data entry and reconciliation.</span>
+  <button class="bg-[#0053CC] text-white text-sm px-4 py-1.5 rounded">Choose plan</button>
+</div>
+</template>
+
+
+<!-- ============================================================ -->
+<!-- VIEW 2 — offer banner above header                            -->
+<!-- ============================================================ -->
+<div id="view-2" class="view">
+  <div data-mount="offer"></div>
+  <div data-mount="shell"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW 3 — trial banner + offer banner + header                 -->
+<!-- ============================================================ -->
+<div id="view-3" class="view">
+  <div data-mount="trial"></div>
+  <div data-mount="offer"></div>
+  <div data-mount="shell"></div>
+</div>
+
+
+<script>
+/* ============ Pricing state (view 1) ============ */
+let billing = 'yearly';
+
+const PRICES = {
+  basic:     { yearly: 52,  monthly: 65 },
+  essential: { yearly: 92,  monthly: 115 },
+  pro:       { yearly: 220, monthly: 275 }
+};
+
+function setBilling(next) {
+  billing = next;
+  const monthly = document.getElementById('toggle-monthly');
+  const yearly  = document.getElementById('toggle-yearly');
+  if (billing === 'yearly') {
+    yearly.classList.add('bg-blue-600','text-white');
+    yearly.classList.remove('text-slate-500');
+    monthly.classList.remove('bg-blue-600','text-white');
+    monthly.classList.add('text-slate-500');
+  } else {
+    monthly.classList.add('bg-blue-600','text-white');
+    monthly.classList.remove('text-slate-500');
+    yearly.classList.remove('bg-blue-600','text-white');
+    yearly.classList.add('text-slate-500');
+  }
+
+  document.querySelector('[data-price="basic"]').textContent     = '$' + PRICES.basic[billing];
+  document.querySelector('[data-price="essential"]').textContent = '$' + PRICES.essential[billing];
+  document.querySelector('[data-price="pro"]').textContent       = '$' + PRICES.pro[billing];
+
+  const label = billing === 'yearly' ? 'Billed yearly' : 'Billed monthly';
+  document.querySelectorAll('[data-billing]').forEach(el => el.textContent = label);
+
+  const eligible = (billing === 'yearly');
+  ['basic','essential'].forEach(plan => {
+    const text = document.querySelector(`[data-history-text="${plan}"]`);
+    if (!text) return;
+    if (eligible) {
+      text.innerHTML = '<span class="text-emerald-700 font-semibold">1 year of historical data — free</span>';
+    } else {
+      text.textContent = 'Paid unlimited history';
+    }
+  });
+
+  // Variant A badge only shown on yearly
+  document.getElementById('variant-A-badge').style.display = eligible ? '' : 'none';
+
+  if (eligible) {
+    document.getElementById('banner-title').textContent = 'Basic & Essential yearly subs get 1 year of history — free';
+    document.getElementById('banner-body').textContent  = 'Need more than a year? Additional history is $30 per 500 transactions. The more you sync, the less per transaction.';
+  } else {
+    document.getElementById('banner-title').textContent = 'Have historical transactions? Get custom pricing!';
+    document.getElementById('banner-body').textContent  = 'Synchronize each additional 500 transactions for $30. The more you purchase, the less you pay per synced transaction. Contact our team to find out more.';
+  }
+}
+
+document.getElementById('toggle-monthly').addEventListener('click', () => setBilling('monthly'));
+document.getElementById('toggle-yearly').addEventListener('click',  () => setBilling('yearly'));
+document.querySelectorAll('[data-sub]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.textContent = 'Subscribed ✓'; btn.disabled = true;
+    setTimeout(() => { btn.textContent = 'Subscribe'; btn.disabled = false; }, 1500);
+  });
+});
+
+/* ============ Mount templates into views 2 & 3 ============ */
+function mountTemplate(id) {
+  const t = document.getElementById(id);
+  return t.content.cloneNode(true);
+}
+function mountAll() {
+  document.querySelectorAll('#view-2 [data-mount], #view-3 [data-mount]').forEach(el => {
+    const kind = el.dataset.mount;
+    const map = { shell: 'tpl-app-shell', offer: 'tpl-offer-banner', trial: 'tpl-trial-banner' };
+    el.appendChild(mountTemplate(map[kind]));
+  });
+}
+mountAll();
+
+/* ============ View switcher ============ */
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.view;
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+    document.getElementById('view-' + v).classList.add('active');
+    document.querySelectorAll('.view-btn').forEach(b => {
+      b.classList.remove('bg-blue-600'); b.classList.add('bg-slate-700');
+    });
+    btn.classList.add('bg-blue-600'); btn.classList.remove('bg-slate-700');
+  });
+});
+
+/* ============ 24h countdown ============ */
+const deadline = Date.now() + 24 * 60 * 60 * 1000;
+function tick() {
+  const remaining = Math.max(0, deadline - Date.now());
+  const h = Math.floor(remaining / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  document.querySelectorAll('.offer-timer').forEach(t => {
+    t.querySelector('[data-h]').textContent = String(h).padStart(2,'0');
+    t.querySelector('[data-m]').textContent = String(m).padStart(2,'0');
+    t.querySelector('[data-s]').textContent = String(s).padStart(2,'0');
+  });
+}
+tick();
+setInterval(tick, 1000);
+
+/* Init pricing */
+setBilling('yearly');
+</script>
+
+</body>
+</html>
