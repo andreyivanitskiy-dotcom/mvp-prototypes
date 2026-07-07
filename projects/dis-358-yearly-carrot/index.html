@@ -36,21 +36,23 @@
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">2. Who is the target</h2>
+      <p class="text-sm text-slate-500 italic mb-2">Eligibility as scoped in the DIS-358 card:</p>
       <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-        <li><strong>PLG trial users</strong> on Basic or Essential — the plans currently under-converting to yearly.</li>
-        <li><strong>Companies under 1M ARR</strong> — the segment that already accounts for ~54% of monthly Purchase events (Mixpanel), i.e. meaningful reach.</li>
-        <li><strong>Within the first 24 hours of trial</strong> — when intent-to-buy is highest and the switch decision is still open.</li>
-        <li><strong>Excluded:</strong> Pro &amp; Premium (SLG, not the PLG conversion target); returning trials, AIPs, and existing paid customers.</li>
+        <li><strong>PLG traffic</strong> — the segment the experiment aims to move toward yearly plans.</li>
+        <li><strong>Annual revenue up to 1M</strong> — hard eligibility cap; no AIPs.</li>
+        <li><strong>First 24 hours after trial start</strong> — the promo window is bounded.</li>
+        <li><strong>Yearly Basic &amp; Essential</strong> — the plans that surface the free-history unlock.</li>
+        <li><strong>Excluded:</strong> Pro &amp; Premium (SLG, not the PLG conversion target); AIPs; anyone past the 24h window.</li>
       </ul>
     </div>
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold text-slate-900 mb-2">3. End goal(s)</h2>
       <ul class="list-disc list-inside text-sm text-slate-600 space-y-1.5">
-        <li><strong>Primary metric:</strong> Yearly-to-Total purchase ratio ↑ on Basic &amp; Essential (a clean falsifiable signal already tracked in Mixpanel).</li>
-        <li><strong>Downstream:</strong> LTV lift — yearly cohorts churn at ~8% vs monthly at ~31%, so every switched cohort compounds through the year.</li>
-        <li><strong>Guardrail:</strong> churn on yearly subs must stay flat — a "carrot" that pulls in wrong-fit users would erode the gain via refunds/deflection.</li>
-        <li><strong>Second-order:</strong> softens historical-data support load (Renata's team) by resolving the ask up-front instead of via ticket.</li>
+        <li><strong>Primary metric:</strong> Yearly / Total purchase ratio ↑ — <strong>target 50%+</strong> (fluctuation fine), per the Jira card. Tracked in the two linked Mixpanel reports on the card.</li>
+        <li><strong>Downstream:</strong> LTV lift — yearly cohorts have shown lower churn than monthly in earlier snapshots, so a shifted cohort mix compounds retention.</li>
+        <li><strong>Guardrail:</strong> churn on newly-converted yearly subs must not spike — a promo that pulls in wrong-fit users would erode the gain via refunds.</li>
+        <li><strong>Second-order:</strong> softens historical-data support load (already sanity-checked with Renata) by resolving the ask up-front instead of via ticket.</li>
       </ul>
     </div>
 
