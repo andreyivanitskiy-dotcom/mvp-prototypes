@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Yearly upgrade nudge — dashboard banner</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Roboto', system-ui, sans-serif; }
+  .ui { font-family: 'Roboto', system-ui, sans-serif; }
+  .sb-item { color:#555; display:flex; align-items:center; gap:8px; padding:9px 14px; font-size:13px; cursor:pointer; }
+  .sb-item:hover { background:#eee; }
+  .sb-item.active { background:#007AFF; color:#fff; position:relative; }
+  .sb-item.active::before { content:""; position:absolute; top:12px; right:-6px; width:11px; height:11px; background:#007AFF; transform:rotate(45deg); }
+
+  /* ==== BANNER TOKENS (sampled from the DIS-358 green banner) ==== */
+  :root{
+    --g-fill:      #EDFCF1;   /* banner background */
+    --g-border:    #A5DFB8;   /* banner border      */
+    --g-strong:    #1E8A44;   /* primary button / accent */
+    --g-strong-hv: #177037;   /* primary hover      */
+    --g-headline:  #14532D;   /* bold headline text */
+    --g-body:      #4A5A66;   /* body copy          */
+  }
+  .promo{
+    background: var(--g-fill);
+    border: 1px dashed var(--g-border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .promo-solid{ border-style: solid; }
+  .promo h2{ color: var(--g-headline); font-weight:700; font-size:14px; line-height:1.35; margin:0 0 4px; }
+  .promo p { color: var(--g-body);     font-size:13px;  line-height:1.5;  margin:0 0 14px; }
+  .btn{ font-size:13px; font-weight:600; border-radius:6px; padding:9px 16px; line-height:1; cursor:pointer; border:1px solid transparent; }
+  .btn-primary{ background:var(--g-strong); color:#fff; }
+  .btn-primary:hover{ background:var(--g-strong-hv); }
+  .btn-ghost{ background:#fff; color:var(--g-strong); border-color:var(--g-strong); }
+  .btn-ghost:hover{ background:#F3FBF6; }
+  .variant{ display:none } .variant.active{ display:block }
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<div class="bg-slate-900 text-white text-xs sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-2 flex-wrap ui">
+    <a href="../" class="text-slate-300 hover:text-white mr-2">&larr; Back to overview</a>
+    <span class="text-slate-400">Variant:</span>
+    <button data-v="1" class="vbtn px-3 py-1 rounded bg-blue-600">1 &mdash; Dashed border (matches DIS-358)</button>
+    <button data-v="2" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">2 &mdash; Solid border</button>
+    <button data-v="3" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">3 &mdash; Buttons right-aligned</button>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div class="max-w-6xl mx-auto my-6 bg-white shadow-sm border border-slate-200 rounded-lg overflow-hidden">
+
+  <!-- guidance strip -->
+  <div class="bg-[#E8F1FE] border-b border-[#D6E4F7] text-center py-2 text-[12px] text-slate-700 ui">
+    &#127974; Need guidance? Connect with your Success Manager and get expert help.
+    <span class="inline-block ml-2 bg-[#007AFF] text-white rounded px-3 py-1 text-[11px]">Book a call</span>
+  </div>
+
+  <!-- account bar -->
+  <div class="flex items-center justify-between px-4 py-2 border-b border-slate-200 ui">
+    <div class="flex items-center gap-2 text-[13px] text-slate-700">
+      <span class="w-6 h-6 rounded-full bg-[#007AFF] text-white text-[10px] flex items-center justify-center font-semibold">HO</span>
+      Horsey People (&hellip;) &#9662;
+    </div>
+    <div class="text-[12px] text-slate-600">Balance : <span class="text-[#007AFF] border-b-2 border-[#007AFF] pb-0.5">101576</span></div>
+  </div>
+
+  <div class="flex">
+    <!-- sidebar -->
+    <nav class="w-[150px] border-r border-slate-200 py-2 shrink-0">
+      <div class="sb-item">Admin (A)</div>
+      <div class="sb-item">JS mods (A)</div>
+      <div class="sb-item active">Dashboard</div>
+      <div class="sb-item">Mapping</div>
+      <div class="sb-item">Summaries</div>
+      <div class="sb-item">Reconciliation</div>
+      <div class="sb-item">Products and services</div>
+      <div class="px-4 pt-2 pb-1 text-[10px] uppercase tracking-wide text-slate-400">Error grouping (A)</div>
+      <div class="sb-item">Transactions (A)</div>
+      <div class="sb-item">Smart rules (A)</div>
+      <div class="sb-item">Sales (A)</div>
+      <div class="sb-item">Expenses (A)</div>
+      <div class="sb-item">Business Insights (A)</div>
+      <div class="sb-item">Analytics</div>
+      <div class="sb-item">Revenue recognition</div>
+      <div class="sb-item">Settings</div>
+      <div class="sb-item">AI Agents</div>
+      <div class="sb-item">What&rsquo;s New</div>
+      <div class="sb-item">Custom development</div>
+    </nav>
+
+    <!-- main -->
+    <main class="flex-1 px-8 py-7">
+      <div class="max-w-[560px] mx-auto">
+
+        <!-- page header -->
+        <div class="flex items-center justify-between mb-5">
+          <h1 class="text-[20px] font-semibold text-slate-900 ui">Hi Andrey, your data is ready to review</h1>
+          <span class="text-[12px] border border-slate-200 rounded px-2.5 py-1.5 text-slate-600 ui">Last 30 days &#9662;</span>
+        </div>
+
+        <!-- ============ THE BANNER ============ -->
+        <div id="v1" class="variant active mb-6">
+          <section class="promo flex gap-3 items-start">
+            <span class="text-[20px] leading-none shrink-0">&#127873;</span>
+            <div class="min-w-0">
+              <h2>You&rsquo;ve been using Synder for 4 months and we&rsquo;ve saved you 198 hours of work</h2>
+              <p>Now let us save your money &mdash; upgrade to Yearly and save $312 annually!</p>
+              <div class="flex gap-2 flex-wrap">
+                <button class="btn btn-primary">Upgrade now</button>
+                <button class="btn btn-ghost">Remind me later</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="v2" class="variant mb-6">
+          <section class="promo promo-solid flex gap-3 items-start">
+            <span class="text-[20px] leading-none shrink-0">&#127873;</span>
+            <div class="min-w-0">
+              <h2>You&rsquo;ve been using Synder for 4 months and we&rsquo;ve saved you 198 hours of work</h2>
+              <p>Now let us save your money &mdash; upgrade to Yearly and save $312 annually!</p>
+              <div class="flex gap-2 flex-wrap">
+                <button class="btn btn-primary">Upgrade now</button>
+                <button class="btn btn-ghost">Remind me later</button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="v3" class="variant mb-6">
+          <section class="promo">
+            <div class="flex gap-3 items-start justify-between flex-wrap">
+              <div class="flex gap-3 items-start min-w-0 flex-1">
+                <span class="text-[20px] leading-none shrink-0">&#127873;</span>
+                <div class="min-w-0">
+                  <h2>You&rsquo;ve been using Synder for 4 months and we&rsquo;ve saved you 198 hours of work</h2>
+                  <p class="!mb-0">Now let us save your money &mdash; upgrade to Yearly and save $312 annually!</p>
+                </div>
+              </div>
+              <div class="flex gap-2 shrink-0 self-center">
+                <button class="btn btn-primary">Upgrade now</button>
+                <button class="btn btn-ghost">Remind me later</button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- ============ /THE BANNER ============ -->
+
+        <!-- two columns -->
+        <div class="grid grid-cols-2 gap-6 ui">
+          <div>
+            <div class="text-[13px] font-semibold text-slate-800 mb-2.5 flex items-center justify-between">
+              <span>Data readiness</span><span class="text-[11px] text-slate-400">P S &rarr; &#9673;</span>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3 mb-2.5">
+              <div class="text-[11px] text-slate-500 mb-1">Transactions &#9432;</div>
+              <div class="text-[18px] font-semibold text-[#007AFF]">147,275 &rsaquo;</div>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3 mb-2.5">
+              <div class="text-[11px] text-slate-500 mb-2">Summary completeness &#9432;</div>
+              <div class="flex justify-between items-center text-[11px] text-slate-600 mb-1.5"><span class="bg-[#E4F7E8] text-[#1E8A44] rounded px-1.5 py-0.5">Fully fetched</span><span>51 &rsaquo;</span></div>
+              <div class="flex justify-between items-center text-[11px] text-slate-600 mb-1.5"><span class="bg-[#FDF3DF] text-[#9A6B12] rounded px-1.5 py-0.5">Partially fetched</span><span>7 &rsaquo;</span></div>
+              <div class="flex justify-between items-center text-[11px] text-slate-600"><span class="bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">Fetching</span><span>2 &rsaquo;</span></div>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3 mb-2.5">
+              <div class="text-[11px] text-slate-500 mb-1">Mappings &#9432;</div>
+              <div class="text-[12px] text-slate-700">All mappings configured</div>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="text-[11px] text-slate-500 mb-2">Integrations &#9432;</div>
+              <div class="flex justify-between items-center text-[12px] text-slate-700 mb-1.5">Horsey People (PayPal)<span class="bg-[#E4F7E8] text-[#1E8A44] rounded px-1.5 py-0.5 text-[11px]">Connected</span></div>
+              <div class="flex justify-between items-center text-[12px] text-slate-700 mb-2">horseypeople.com.au (Stripe)<span class="bg-[#E4F7E8] text-[#1E8A44] rounded px-1.5 py-0.5 text-[11px]">Connected</span></div>
+              <div class="text-[11px] text-[#007AFF]">View Organization settings &rsaquo;</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[13px] font-semibold text-slate-800 mb-2.5 flex items-center justify-between">
+              <span>Posting to books</span><span class="text-[11px] text-slate-400">&#9673; &rarr; X</span>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3 mb-2.5">
+              <div class="text-[11px] text-slate-500 mb-1">Summaries synced &#9432;</div>
+              <div class="text-[12px] text-slate-700">No summaries yet</div>
+              <div class="text-[11px] text-[#007AFF] mt-1">Why don&rsquo;t I see any summaries?</div>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3 mb-2.5">
+              <div class="text-[11px] text-slate-500 mb-2">Synchronization &#9432;</div>
+              <div class="flex justify-between items-center text-[11px] text-slate-600 mb-1.5"><span class="bg-[#E4F7E8] text-[#1E8A44] rounded px-1.5 py-0.5">Ready to sync</span><span>58 &rsaquo;</span></div>
+              <div class="flex justify-between items-center text-[11px] text-slate-600"><span class="bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">Not ready</span><span>2 &rsaquo;</span></div>
+            </div>
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="text-[11px] text-slate-500 mb-2">Accounting &#9432;</div>
+              <div class="flex justify-between items-center text-[12px] text-slate-700 mb-2">Horsey People (Xero)<span class="bg-[#E4F7E8] text-[#1E8A44] rounded px-1.5 py-0.5 text-[11px]">Connected</span></div>
+              <div class="text-[11px] text-[#007AFF]">View Organization settings &rsaquo;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- spec card -->
+<div class="max-w-6xl mx-auto px-4 pb-14 ui">
+  <div class="bg-white border border-slate-200 rounded-lg p-5 text-[12.5px] text-slate-700">
+    <div class="font-semibold text-slate-900 mb-3 text-[14px]">Design tokens</div>
+    <table class="w-full text-left">
+      <tr class="border-b border-slate-100"><td class="py-1.5 w-56">Banner background</td><td><code>#EDFCF1</code></td><td class="w-8"><span class="inline-block w-5 h-5 rounded" style="background:#EDFCF1;border:1px solid #ddd"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Banner border</td><td><code>1px dashed #A5DFB8</code>, radius <code>8px</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#A5DFB8"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Headline</td><td><code>#14532D</code> &middot; 14px / 700</td><td><span class="inline-block w-5 h-5 rounded" style="background:#14532D"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Body copy</td><td><code>#4A5A66</code> &middot; 13px / 400, line-height 1.5</td><td><span class="inline-block w-5 h-5 rounded" style="background:#4A5A66"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Primary button</td><td><code>#1E8A44</code> fill, white text, radius <code>6px</code>, padding <code>9px 16px</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#1E8A44"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Primary hover</td><td><code>#177037</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#177037"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Secondary button</td><td>white fill, <code>1px solid #1E8A44</code>, text <code>#1E8A44</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#fff;border:1px solid #1E8A44"></span></td></tr>
+      <tr><td class="py-1.5">Padding / gutters</td><td>banner <code>16px 18px</code>, icon gap <code>12px</code>, button gap <code>8px</code>, margin-bottom <code>24px</code></td><td></td></tr>
+    </table>
+  </div>
+</div>
+
+<footer class="text-center text-xs text-slate-400 pb-8">Powered by Isaac &#129426;</footer>
+
+<script>
+  document.querySelectorAll('.vbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.vbtn').forEach(function(x){ x.className='vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600'; });
+      b.className='vbtn px-3 py-1 rounded bg-blue-600';
+      document.querySelectorAll('.variant').forEach(function(v){ v.classList.remove('active'); });
+      document.getElementById('v'+b.dataset.v).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
