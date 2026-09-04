@@ -25,11 +25,10 @@
   }
   .promo{
     background: var(--g-fill);
-    border: 1px dashed var(--g-border);
+    border: 1px solid var(--g-border);
     border-radius: 8px;
     padding: 16px 18px;
   }
-  .promo-solid{ border-style: solid; }
   .promo h2{ color: var(--g-headline); font-weight:700; font-size:14px; line-height:1.35; margin:0 0 4px; }
   .promo p { color: var(--g-body);     font-size:13px;  line-height:1.5;  margin:0 0 14px; }
   .btn{ font-size:13px; font-weight:600; border-radius:6px; padding:9px 16px; line-height:1; cursor:pointer; border:1px solid transparent; }
@@ -45,14 +44,11 @@
 <div class="bg-slate-900 text-white text-xs sticky top-0 z-50">
   <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-2 flex-wrap ui">
     <a href="../" class="text-slate-300 hover:text-white mr-2">&larr; Back to overview</a>
-    <span class="text-slate-400">Layout:</span>
-    <button data-v="1" class="vbtn px-3 py-1 rounded bg-blue-600">1 &mdash; Dashed border</button>
-    <button data-v="2" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">2 &mdash; Solid border</button>
-    <button data-v="3" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">3 &mdash; Buttons right</button>
-    <span class="text-slate-400 ml-2">Copy:</span>
-    <button data-v="4" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">4 &mdash; &ldquo;Take care of&rdquo; (Andrey, polished)</button>
-    <button data-v="5" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">5 &mdash; &ldquo;Worrying&rdquo; (Andrey, verbatim)</button>
-    <button data-v="6" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">6 &mdash; Minimal</button>
+    <span class="text-slate-400">Copy:</span>
+    <button data-v="4" class="vbtn px-3 py-1 rounded bg-blue-600">1 &mdash; &ldquo;Take care of&rdquo; (polished)</button>
+    <button data-v="5" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">2 &mdash; &ldquo;Worrying&rdquo; (verbatim)</button>
+    <button data-v="6" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">3 &mdash; Minimal</button>
+    <button data-v="2" class="vbtn px-3 py-1 rounded bg-slate-700 hover:bg-slate-600">4 &mdash; Original (198 hours)</button>
   </div>
 </div>
 
@@ -109,7 +105,7 @@
         </div>
 
         <!-- ============ THE BANNER ============ -->
-        <div id="v1" class="variant active mb-6">
+        <div id="v2" class="variant mb-6">
           <section class="promo flex gap-3 items-start">
             <span class="text-[20px] leading-none shrink-0">&#127873;</span>
             <div class="min-w-0">
@@ -123,38 +119,7 @@
           </section>
         </div>
 
-        <div id="v2" class="variant mb-6">
-          <section class="promo promo-solid flex gap-3 items-start">
-            <span class="text-[20px] leading-none shrink-0">&#127873;</span>
-            <div class="min-w-0">
-              <h2>You&rsquo;ve been using Synder for 4 months and we&rsquo;ve saved you 198 hours of work</h2>
-              <p>Now let us save your money &mdash; upgrade to Yearly and save $312 annually!</p>
-              <div class="flex gap-2 flex-wrap">
-                <button class="btn btn-primary">Upgrade now</button>
-                <button class="btn btn-ghost">Remind me later</button>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div id="v3" class="variant mb-6">
-          <section class="promo">
-            <div class="flex gap-3 items-start justify-between flex-wrap">
-              <div class="flex gap-3 items-start min-w-0 flex-1">
-                <span class="text-[20px] leading-none shrink-0">&#127873;</span>
-                <div class="min-w-0">
-                  <h2>You&rsquo;ve been using Synder for 4 months and we&rsquo;ve saved you 198 hours of work</h2>
-                  <p class="!mb-0">Now let us save your money &mdash; upgrade to Yearly and save $312 annually!</p>
-                </div>
-              </div>
-              <div class="flex gap-2 shrink-0 self-center">
-                <button class="btn btn-primary">Upgrade now</button>
-                <button class="btn btn-ghost">Remind me later</button>
-              </div>
-            </div>
-          </section>
-        </div>
-        <div id="v4" class="variant mb-6">
+        <div id="v4" class="variant active mb-6">
           <section class="promo flex gap-3 items-start">
             <span class="text-[20px] leading-none shrink-0">&#127873;</span>
             <div class="min-w-0">
@@ -257,7 +222,7 @@
     <div class="font-semibold text-slate-900 mb-3 text-[14px]">Design tokens</div>
     <table class="w-full text-left">
       <tr class="border-b border-slate-100"><td class="py-1.5 w-56">Banner background</td><td><code>#EDFCF1</code></td><td class="w-8"><span class="inline-block w-5 h-5 rounded" style="background:#EDFCF1;border:1px solid #ddd"></span></td></tr>
-      <tr class="border-b border-slate-100"><td class="py-1.5">Banner border</td><td><code>1px dashed #A5DFB8</code>, radius <code>8px</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#A5DFB8"></span></td></tr>
+      <tr class="border-b border-slate-100"><td class="py-1.5">Banner border</td><td><code>1px solid #A5DFB8</code>, radius <code>8px</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#A5DFB8"></span></td></tr>
       <tr class="border-b border-slate-100"><td class="py-1.5">Headline</td><td><code>#14532D</code> &middot; 14px / 700</td><td><span class="inline-block w-5 h-5 rounded" style="background:#14532D"></span></td></tr>
       <tr class="border-b border-slate-100"><td class="py-1.5">Body copy</td><td><code>#4A5A66</code> &middot; 13px / 400, line-height 1.5</td><td><span class="inline-block w-5 h-5 rounded" style="background:#4A5A66"></span></td></tr>
       <tr class="border-b border-slate-100"><td class="py-1.5">Primary button</td><td><code>#1E8A44</code> fill, white text, radius <code>6px</code>, padding <code>9px 16px</code></td><td><span class="inline-block w-5 h-5 rounded" style="background:#1E8A44"></span></td></tr>
