@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIS-547 v2 — TR prototype (identical UI + new bits only)</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0053CC;
+    --primary-50: #80A9E5;
+    --primary-20: #CCDDF5;
+    --primary-10: #E0EBFD;
+    --primary-5: #F2F6FC;
+    --err: #CC2929;
+    --err-light: #FFDFD8;
+    --err-50: #FFECE8;
+    --warn: #CB7515;
+    --warn-light: #FFF1DD;
+    --warn-soft: #FFE8C7;
+    --ok: #1F8940;
+    --ok-50: #DDF5C7;
+    --ok-light: #ECFDDC;
+    --ok-dark: #0D6A2A;
+    --action-bg: #D6EBFF;
+    --action-fg: #3C4EAC;
+    --grey: #1A1B24;
+    --grey-50: #6B778C;
+    --grey-30: #B4BBCB;
+    --grey-20: #DFE4EC;
+    --grey-10: #EFF1F5;
+    --grey-5: #F7F8FA;
+    --white: #FFFFFF;
+    --border: 1px solid var(--grey-20);
+    --font: Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--grey);
+    background: #E8ECF2;
+    font-size: 14px;
+    line-height: 1.43;
+  }
+  button, input, select { font-family: inherit; font-size: inherit; }
+
+  /* Prototype chrome (not part of TR product UI) */
+  .proto-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: #1A1B24; color: #fff;
+    display: flex; align-items: center; gap: 16px;
+    padding: 8px 16px; font-size: 12px;
+  }
+  .proto-bar b { font-weight: 500; }
+  .proto-bar label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; opacity: .9; }
+  .proto-bar .sep { width: 1px; height: 16px; background: #444; }
+  .proto-bar a { color: #80A9E5; }
+
+  /* Modal shell matching CommonPageModal */
+  .modal-shell {
+    max-width: 1344px;
+    margin: 16px auto 40px;
+    background: var(--white);
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(26,27,36,.12);
+    min-height: 720px;
+    display: flex;
+    flex-direction: column;
+  }
+  .page-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px;
+    border-bottom: var(--border);
+    min-height: 64px;
+  }
+  .page-header .back {
+    width: 36px; height: 36px; border: 0; background: transparent;
+    border-radius: 50%; cursor: pointer; color: var(--grey-50);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-header .back:hover { background: var(--grey-10); }
+  .page-header h1 {
+    margin: 0; font-size: 20px; font-weight: 500; flex: 1;
+  }
+  .page-header .actions { display: flex; align-items: center; gap: 8px; }
+
+  .page-body { padding: 24px 32px 40px; flex: 1; }
+
+  /* Chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 16px; font-size: 12px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .chip-ok { background: var(--ok-50); color: var(--ok); }
+  .chip-info { background: var(--primary-10); color: var(--primary); }
+  .chip-fail { background: var(--err-light); color: var(--err); }
+  .chip-warn { background: var(--warn-soft); color: var(--warn); }
+  .chip-action { background: var(--action-bg); color: var(--action-fg); }
+  .chip-default { background: var(--grey-20); color: var(--grey-50); }
+  .chip .ico { font-size: 14px; line-height: 1; }
+
+  /* Status (FailedStatus / SuccessStatus style — rectangular, not pill) */
+  .status {
+    display: inline-block; padding: 0 5px; border-radius: 4px;
+    font-size: 14px; white-space: nowrap; width: fit-content;
+  }
+  .status-fail { background: var(--err-light); color: var(--err); }
+  .status-ok { background: var(--ok-50); color: var(--ok); }
+  .status-action { background: var(--action-bg); color: var(--action-fg); }
+  .status-warn { background: var(--warn-soft); color: var(--warn); }
+
+  /* Buttons */
+  .btn-primary {
+    background: var(--primary); color: #fff; border: 0;
+    border-radius: 4px; padding: 8px 16px; font-weight: 500;
+    cursor: pointer; height: 36px;
+  }
+  .btn-primary:hover { background: #0046ad; }
+  .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-outline {
+    background: #fff; color: var(--primary);
+    border: 1px solid var(--primary); border-radius: 4px;
+    padding: 7px 14px; font-weight: 500; cursor: pointer; height: 36px;
+  }
+  .btn-outline:hover { background: var(--primary-5); }
+  .btn-text {
+    background: transparent; border: 0; color: var(--primary);
+    cursor: pointer; font-weight: 500; padding: 8px 12px;
+  }
+
+  /* Fields */
+  .label {
+    display: block; font-size: 12px; color: var(--grey-50);
+    margin-bottom: 6px; font-weight: 400;
+  }
+  .label .req { color: var(--err); margin-left: 2px; }
+  .field { margin-bottom: 0; }
+  .select, .input {
+    width: 100%; height: 40px;
+    border: 1px solid var(--grey-30); border-radius: 4px;
+    padding: 8px 12px; background: #fff; color: var(--grey);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B778C' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .input { background-image: none; padding-right: 12px; }
+  .select:disabled, .input:disabled { background: var(--grey-5); color: var(--grey-50); }
+  .hint { font-size: 12px; color: var(--grey-50); margin-top: 4px; }
+  .hint a, a.link { color: var(--primary); text-decoration: none; cursor: pointer; }
+  .hint a:hover, a.link:hover { text-decoration: underline; }
+
+  .date-row { display: flex; gap: 12px; align-items: flex-end; max-width: 420px; }
+  .date-row .field { flex: 1; }
+  .date-sep { color: var(--grey-50); padding-bottom: 10px; }
+
+  /* Two-column layout */
+  .cols {
+    display: flex; gap: 56px; margin-top: 40px; width: 100%;
+  }
+  .col { flex: 1; min-width: 0; }
+  .col-divider {
+    width: 1px; background: var(--grey-20); flex-shrink: 0; align-self: stretch;
+  }
+  .col-title { font-size: 20px; font-weight: 500; margin: 0 0 16px; }
+  .platform-row {
+    display: flex; align-items: center; gap: 6px; margin-top: 8px;
+  }
+  .platform-row img, .platform-ico {
+    width: 20px; height: 20px; border-radius: 2px;
+  }
+  .platform-ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #2CA01C; color: #fff; font-size: 10px; font-weight: 700;
+  }
+  .platform-ico.shopify { background: #95BF47; }
+  .sub-label { font-size: 14px; font-weight: 500; margin: 0; }
+
+  .info-box {
+    margin-top: 16px; padding: 12px 16px;
+    border: var(--border); border-radius: 4px;
+    background: var(--grey-5); font-size: 14px; color: var(--grey);
+  }
+  .stack-field { margin-top: 32px; }
+  .stack-field.first { margin-top: 16px; }
+
+  /* NEW markers */
+  .new-wrap {
+    position: relative;
+    border: 1.5px dashed transparent;
+    border-radius: 6px;
+    padding: 0;
+    transition: border-color .15s, background .15s;
+  }
+  body.show-new .new-wrap {
+    border-color: #9B59B6;
+    background: rgba(155,89,182,.04);
+    padding: 10px 12px;
+    margin: -10px -12px;
+  }
+  .new-badge {
+    display: none;
+    position: absolute; top: -9px; right: 8px;
+    background: #9B59B6; color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    padding: 1px 6px; border-radius: 3px;
+  }
+  body.show-new .new-badge { display: inline-block; }
+
+  /* Scope choice */
+  .scope-options { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .scope-opt {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--grey-30); border-radius: 4px;
+    padding: 10px 12px; cursor: pointer; background: #fff;
+  }
+  .scope-opt:hover { border-color: var(--primary-50); }
+  .scope-opt.on { border-color: var(--primary); background: var(--primary-5); }
+  .scope-opt input { margin-top: 3px; accent-color: var(--primary); }
+  .scope-opt .t { font-weight: 500; }
+  .scope-opt .d { font-size: 12px; color: var(--grey-50); margin-top: 2px; }
+
+  /* Auto-filled accounts list */
+  .acct-list {
+    border: 1px solid var(--grey-30); border-radius: 4px; overflow: hidden;
+    background: var(--grey-5);
+  }
+  .acct-list-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-bottom: 1px solid var(--grey-20);
+    font-size: 13px;
+  }
+  .acct-list-row:last-child { border-bottom: 0; }
+  .acct-list-row .tab {
+    min-width: 110px; color: var(--grey-50); font-size: 12px;
+  }
+  .acct-list-row .name { flex: 1; font-weight: 500; }
+  .acct-list-row .id { color: var(--grey-50); font-size: 12px; }
+  .warn-inline {
+    margin-top: 8px; padding: 8px 12px;
+    background: var(--warn-light); border-left: 3px solid var(--warn);
+    border-radius: 2px; font-size: 12px; color: var(--grey);
+  }
+
+  /* Info banner (create) */
+  .info-banner {
+    display: flex; gap: 24px; align-items: flex-start;
+    padding: 16px 24px; border-radius: 4px;
+    background: var(--primary-5); margin-bottom: 40px;
+  }
+  .info-banner .ill {
+    width: 124px; height: 54px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary-20), var(--primary-10));
+    border-radius: 4px;
+  }
+  .info-banner h3 { margin: 0 0 4px; font-size: 20px; font-weight: 500; }
+  .info-banner p { margin: 0; font-size: 14px; }
+  .info-banner .ok-line { color: var(--ok); margin-top: 4px; }
+  .info-banner .x {
+    margin-left: auto; border: 0; background: transparent;
+    color: var(--grey-50); cursor: pointer; font-size: 18px; line-height: 1;
+  }
+
+  /* Results */
+  .result-title-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .result-title-row h2 {
+    margin: 0; font-size: 24px; font-weight: 500;
+  }
+  .result-sub { color: var(--grey-50); font-size: 14px; margin-top: 4px; }
+  .result-meta {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; margin-bottom: 16px;
+  }
+  .result-meta .right { display: flex; gap: 8px; }
+
+  /* Account switcher — row of clickable status cards (NEW) */
+  .account-switch {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 0;
+  }
+  .account-switch > .label { margin-bottom: 0; }
+  .acct-btns {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .acct-btn {
+    flex: 1 1 160px;
+    min-width: 150px;
+    max-width: 240px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--grey-20);
+    border-radius: 4px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--grey);
+    transition: border-color .12s, background .12s, box-shadow .12s;
+  }
+  .acct-btn:hover { border-color: var(--primary-50); background: var(--primary-5); }
+  .acct-btn.on {
+    border-color: var(--primary);
+    background: var(--primary-5);
+    box-shadow: inset 0 0 0 1px var(--primary);
+  }
+  .acct-btn .ab-name {
+    display: block; font-weight: 500; font-size: 13px; margin-bottom: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .acct-btn .ab-meta {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .acct-btn .ab-open {
+    font-size: 12px; color: var(--grey-50);
+  }
+  .acct-btn.overview-btn {
+    max-width: 180px;
+    border-style: dashed;
+  }
+
+  /* Outside clearing accounts — accordion panel (NEW) */
+  .outside-panel {
+    border: 1px solid var(--grey-20);
+    border-radius: 4px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .outside-panel.has-unknown { border-color: var(--warn); }
+  .outside-head {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 12px 16px;
+    background: var(--grey-5); border: 0; cursor: pointer;
+    font: inherit; color: var(--grey); text-align: left;
+  }
+  .outside-panel.has-unknown .outside-head { background: var(--warn-light); }
+  .outside-head:hover { background: var(--grey-10); }
+  .outside-panel.has-unknown .outside-head:hover { background: #ffe4bf; }
+  .outside-head .oh-title { font-weight: 500; font-size: 14px; }
+  .outside-head .oh-meta { color: var(--grey-50); font-size: 13px; flex: 1; }
+  .outside-head .oh-chevron {
+    color: var(--grey-50); transition: transform .15s; font-size: 12px;
+  }
+  .outside-panel.open .oh-chevron { transform: rotate(180deg); }
+  .outside-body { display: none; border-top: 1px solid var(--grey-20); }
+  .outside-panel.open .outside-body { display: block; }
+  .out-group { border-bottom: 1px solid var(--grey-10); }
+  .out-group:last-child { border-bottom: 0; }
+  .out-group-label {
+    padding: 8px 16px 4px; font-size: 11px; font-weight: 500;
+    color: var(--grey-50); letter-spacing: .03em; text-transform: uppercase;
+  }
+  .out-group.unknown .out-group-label { color: var(--warn); }
+  .out-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto auto;
+    gap: 8px 12px; align-items: center;
+    width: 100%; padding: 10px 16px;
+    background: #fff; border: 0; border-top: 1px solid var(--grey-10);
+    cursor: pointer; font: inherit; color: var(--grey); text-align: left;
+  }
+  .out-row:hover { background: var(--grey-5); }
+  .out-row .or-chevron { color: var(--grey-30); font-size: 11px; transition: transform .15s; }
+  .out-row.open .or-chevron { transform: rotate(90deg); color: var(--grey-50); }
+  .out-row .or-name { font-weight: 500; font-size: 13px; }
+  .out-row .or-reason { display: block; font-size: 12px; color: var(--grey-50); font-weight: 400; margin-top: 2px; }
+  .out-row .or-count { font-size: 12px; color: var(--grey-50); white-space: nowrap; }
+  .out-row .or-amt { font-size: 13px; font-weight: 500; white-space: nowrap; text-align: right; }
+  .out-row.unknown-row { background: var(--warn-light); }
+  .out-row.unknown-row:hover { background: #ffe4bf; }
+  .out-row.unknown-row .or-name { color: var(--warn); }
+  .out-empty {
+    padding: 10px 16px 12px 46px; font-size: 13px; color: var(--grey-50);
+    border-top: 1px solid var(--grey-10); font-style: italic;
+  }
+  .out-payments {
+    display: none; padding: 0 16px 12px 46px; background: var(--grey-5);
+    border-top: 1px solid var(--grey-10);
+  }
+  .out-row.open + .out-payments { display: block; }
+  .out-payments table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+    background: #fff; border: 1px solid var(--grey-20); border-radius: 4px; overflow: hidden;
+  }
+  .out-payments th {
+    text-align: left; font-weight: 500; color: var(--grey-50);
+    padding: 6px 10px; background: var(--grey-5); border-bottom: 1px solid var(--grey-20);
+  }
+  .out-payments td { padding: 6px 10px; border-bottom: 1px solid var(--grey-10); }
+  .out-payments tr:last-child td { border-bottom: 0; }
+  .out-payments td.num { text-align: right; }
+
+  .balance-box {
+    border: 1px solid var(--err); border-radius: 4px;
+    background: var(--err-50); margin-bottom: 16px; overflow: hidden;
+  }
+  .balance-box.ok { border-color: var(--ok); background: var(--ok-light); }
+  .balance-sum {
+    padding: 12px 16px; font-size: 14px; font-weight: 500;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .balance-box.ok .balance-sum { color: var(--ok); }
+  .balance-box:not(.ok) .balance-sum { color: var(--err); }
+  .balance-cells {
+    display: flex; flex-wrap: wrap; border-top: 1px solid var(--err);
+    align-items: stretch;
+  }
+  .balance-box.ok .balance-cells { border-top-color: var(--ok); }
+  .bcell {
+    padding: 12px 16px; min-width: 140px; flex: 1;
+  }
+  .bcell .l { font-size: 12px; color: var(--grey-50); margin-bottom: 4px; }
+  .bcell .v { font-size: 14px; font-weight: 500; }
+  .bcell.emph { background: var(--err-light); }
+  .balance-box.ok .bcell.emph { background: var(--ok-50); }
+  .bop {
+    display: flex; align-items: center; padding: 0 4px;
+    color: var(--grey-50); font-weight: 500;
+  }
+
+  .warn-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; margin-bottom: 16px;
+    background: var(--warn-light); border-radius: 4px;
+    color: var(--warn); font-size: 14px;
+  }
+  .warn-banner .x { margin-left: auto; border: 0; background: transparent; color: var(--warn); cursor: pointer; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; border-bottom: var(--border); gap: 0; margin-bottom: 0;
+  }
+  .tab {
+    padding: 12px 16px; border: 0; background: transparent;
+    cursor: pointer; font-weight: 500; color: var(--grey-50);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .tab.on { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab .cnt {
+    display: inline-block; padding: 0 6px; border-radius: 10px;
+    font-size: 12px; font-weight: 500;
+  }
+  .tab .cnt.ok { background: var(--ok-50); color: var(--ok); }
+  .tab .cnt.warn { background: var(--warn-soft); color: var(--warn); }
+  .tab .cnt.fail { background: var(--err-light); color: var(--err); }
+  .tab .cnt.def { background: var(--grey-20); color: var(--grey-50); }
+
+  /* Filters */
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+    padding: 12px 16px; background: var(--primary-5);
+    border: var(--border); border-top: 0; margin-bottom: 0;
+  }
+  .filters .field { min-width: 120px; }
+  .filters .field.grow { flex: 1; min-width: 160px; }
+  .filters .label { margin-bottom: 4px; }
+
+  /* Table */
+  .table-wrap { border: var(--border); border-top: 0; overflow-x: auto; }
+  table.res {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  table.res th {
+    text-align: left; font-weight: 500; font-size: 12px; color: var(--grey-50);
+    padding: 10px 12px; border-bottom: var(--border); background: #fff;
+    white-space: nowrap;
+  }
+  table.res th.num, table.res td.num { text-align: right; }
+  table.res td {
+    padding: 12px; border-bottom: 1px solid var(--grey-10);
+    vertical-align: middle;
+  }
+  table.res tr:hover td { background: var(--grey-5); }
+  table.res .muted { color: var(--grey-50); }
+  .ex-note {
+    font-size: 11px; color: var(--grey-50); font-style: italic;
+  }
+
+  .hidden { display: none !important; }
+  .footer-note {
+    margin-top: 24px; padding: 10px 12px;
+    background: var(--grey-5); border-radius: 4px;
+    font-size: 11px; color: var(--grey-50);
+  }
+</style>
+</head>
+<body class="show-new">
+
+<!-- Prototype controls (not product UI) -->
+<div class="proto-bar">
+  <b>DIS-547 prototype v2</b>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="togNew" checked onchange="document.body.classList.toggle('show-new', this.checked)"> Show NEW markers</label>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="togUnknown" onchange="toggleDemoUnknown(this.checked)"> Demo: show an unknown gateway</label>
+  <span class="sep"></span>
+  <span>Org 100417 · Greenleaf Botanicals · Sep 1–30 2026</span>
+  <span class="sep"></span>
+  <a href="#" onclick="showScreen('run');return false">Run form</a>
+  <a href="#" onclick="runAll();return false">→ Results (All accounts)</a>
+</div>
+
+<!-- ===================== RUN FORM ===================== -->
+<div class="modal-shell" id="screen-run">
+  <div class="page-header">
+    <button class="back" title="Back" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </button>
+    <h1>Reconciliation details</h1>
+    <div class="actions">
+      <span class="chip chip-ok"><span class="ico">✓</span> Included in your plan</span>
+      <span class="chip chip-info"><span class="ico">✓</span> Doesn't use your sync credits</span>
+      <button class="btn-primary" id="btnRun" onclick="onRun()">Run reconciliation</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="info-banner" id="infoBanner">
+      <div class="ill" aria-hidden="true"></div>
+      <div>
+        <h3>We compare your integration data with your books.</h3>
+        <p>We take transaction reports from both sides, match them, and show you what's missing or doesn't add up.</p>
+        <p class="ok-line">Read-only — nothing changes in your books.</p>
+      </div>
+      <button class="x" onclick="this.parentElement.classList.add('hidden')" aria-label="Close banner">×</button>
+    </div>
+
+    <div class="field" style="max-width:420px">
+      <label class="label">Date range<span class="req">*</span></label>
+      <div class="date-row">
+        <div class="field"><input class="input" value="09/01/2026" readonly></div>
+        <span class="date-sep">–</span>
+        <div class="field"><input class="input" value="09/30/2026" readonly></div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <!-- Accounting -->
+      <div class="col">
+        <h2 class="col-title">Accounting</h2>
+        <div class="stack-field first">
+          <p class="sub-label">Platform</p>
+          <div class="platform-row">
+            <span class="platform-ico" title="QuickBooks Online">qb</span>
+            <span>Greenleaf Botanicals (QuickBooks Online)</span>
+          </div>
+        </div>
+        <div class="stack-field">
+          <label class="label">Import method<span class="req">*</span></label>
+          <select class="select"><option>Automated</option></select>
+        </div>
+        <div class="info-box">
+          Synder will automatically retrieve the necessary files for you and will map the data according to these
+          <a class="link">matching rules</a>.
+        </div>
+        <div class="info-box" style="margin-top:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="status status-ok">Balance reconciliation</span>
+          </div>
+          Both balances are pulled automatically from your QuickBooks GL Account register — no extra input needed.
+          <div class="hint" style="margin-top:6px"><a class="link">Learn more</a></div>
+        </div>
+      </div>
+
+      <div class="col-divider"></div>
+
+      <!-- Integration -->
+      <div class="col">
+        <h2 class="col-title">Integration</h2>
+        <div class="stack-field first">
+          <label class="label">Integration<span class="req">*</span></label>
+          <select class="select" id="selIntegration" onchange="onIntegrationChange()">
+            <option value="">Select...</option>
+            <option value="shopify" selected>Greenleaf Botanicals (Shopify)</option>
+            <option value="afterpay">110670435 (Afterpay)</option>
+            <option value="tiktok">Greenleaf Botanicals (TikTok)</option>
+            <option value="any">Any account</option>
+          </select>
+          <div class="hint">Timezone: America/New_York</div>
+        </div>
+
+        <!-- NEW: scope choice (Shopify only) -->
+        <div class="stack-field new-wrap" id="scopeBlock">
+          <span class="new-badge">NEW</span>
+          <label class="label">What to reconcile<span class="req">*</span></label>
+          <div class="scope-options">
+            <label class="scope-opt on" id="optSp">
+              <input type="radio" name="scope" value="sp" checked onchange="onScopeChange()">
+              <div>
+                <div class="t">Shopify Payments only</div>
+                <div class="d">Today’s behavior — one clearing account (Shopify Payments).</div>
+              </div>
+            </label>
+            <label class="scope-opt" id="optAll">
+              <input type="radio" name="scope" value="all" onchange="onScopeChange()">
+              <div>
+                <div class="t">All clearing accounts of this store</div>
+                <div class="d">Shopify Payments, POS, Manual, and Other — taken from your Shopify sync settings.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Existing: single Account to reconcile (Shopify Payments only) -->
+        <div class="stack-field" id="singleAccountBlock">
+          <label class="label">Account to reconcile<span class="req">*</span></label>
+          <select class="select" id="selAccount">
+            <optgroup label="SYNDER ACCOUNTS (AUTOMATED DATA RETRIEVAL)">
+              <option selected>Shopify clearing (required for Synder)</option>
+            </optgroup>
+            <optgroup label="SYNDER ACCOUNTS (ASSISTED RECONCILIATION)">
+              <option>Shopify Manual Orders</option>
+              <option>Shopify Other Orders</option>
+              <option>Shopify POS Orders</option>
+            </optgroup>
+          </select>
+          <div class="hint">Currency: USD</div>
+        </div>
+
+        <!-- NEW: auto-filled accounts list (All) -->
+        <div class="stack-field new-wrap hidden" id="allAccountsBlock">
+          <span class="new-badge">NEW</span>
+          <label class="label">Accounts to reconcile<span class="req">*</span></label>
+          <div class="hint" style="margin-bottom:8px">From this store’s Shopify Additional Settings. Read-only.</div>
+          <div class="acct-list">
+            <div class="acct-list-row">
+              <span class="tab">Shopify Payments</span>
+              <span class="name">Shopify clearing (required for Synder)</span>
+              <span class="id">1870412</span>
+              <span class="chip chip-ok">Ready</span>
+            </div>
+            <div class="acct-list-row">
+              <span class="tab">POS</span>
+              <span class="name">Shopify POS Orders</span>
+              <span class="id">1870418</span>
+              <span class="chip chip-ok">Ready</span>
+            </div>
+            <div class="acct-list-row">
+              <span class="tab">Manual</span>
+              <span class="name">Shopify Manual Orders</span>
+              <span class="id">1870416</span>
+              <span class="chip chip-ok">Ready</span>
+            </div>
+            <div class="acct-list-row">
+              <span class="tab">Other</span>
+              <span class="name">Shopify Other Orders</span>
+              <span class="id">1870417</span>
+              <span class="chip chip-ok">Ready</span>
+            </div>
+          </div>
+          <!-- Warning pattern: shown when a type shares Default (demo off — all separate here). Keep markup for the case. -->
+          <div class="warn-inline hidden" id="fallbackWarn">
+            POS has no separate clearing account in settings — those orders will fall into Shopify Payments.
+          </div>
+        </div>
+
+        <div class="stack-field" id="modeBlock">
+          <label class="label">Import method<span class="req">*</span></label>
+          <select class="select"><option>Automated</option></select>
+        </div>
+        <div class="info-box" id="intInfoBox">
+          Synder will automatically retrieve the necessary files for you and will map the data according to these
+          <a class="link">matching rules</a>.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Prototype · layout/labels from synder-ui TransactionReconciliation (ReconciliationCreateHeader, IntegrationSelectAccount, ReconciliationModeSelect, ResultListTabs, …).
+      Account <i>names</i> are Synder-style labels — Pharos settings for org 100417 only returned external ids (1870412/52/53/54), not QBO display names.
+      Button label follows live code (<b>Run reconciliation</b>); some Help Center screenshots still show “Start matching”.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RESULTS ===================== -->
+<div class="modal-shell hidden" id="screen-results">
+  <div class="page-header">
+    <button class="back" title="Back" aria-label="Back" onclick="showScreen('run')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </button>
+    <h1>Reconciliation results</h1>
+    <div class="actions">
+      <button class="btn-outline">Copy share link</button>
+      <button class="btn-outline">Refresh data</button>
+    </div>
+  </div>
+  <div class="page-body" style="display:flex;flex-direction:column;gap:16px">
+
+    <!-- NEW: account switcher — clickable status cards -->
+    <div class="new-wrap" id="acctSwitchWrap">
+      <span class="new-badge">NEW</span>
+      <div class="account-switch">
+        <label class="label">Account</label>
+        <div class="acct-btns" id="acctBtns" role="tablist" aria-label="Clearing accounts"></div>
+      </div>
+    </div>
+
+    <div class="result-meta">
+      <div>
+        <div class="result-title-row">
+          <h2 id="resTitle">Shopify clearing (required for Synder)</h2>
+          <span class="status status-fail" id="resStatus">Attention required</span>
+        </div>
+        <div class="result-sub" id="resSub">Greenleaf Botanicals (Shopify) / Sep 1 – 30, 2026</div>
+      </div>
+      <div class="right">
+        <button class="btn-outline">Process log</button>
+        <button class="btn-outline">Export ▾</button>
+      </div>
+    </div>
+
+    <!-- NEW: Outside clearing accounts accordion -->
+    <div class="new-wrap hidden" id="bucketStripWrap">
+      <span class="new-badge">NEW</span>
+      <div class="outside-panel open" id="outsidePanel">
+        <button type="button" class="outside-head" id="outsideHead" onclick="toggleOutsidePanel()">
+          <span class="oh-title">Outside clearing accounts</span>
+          <span class="oh-meta" id="outsideMeta">92 payments · $9,578.12</span>
+          <span class="status status-warn hidden" id="outsideWarnChip">Needs review</span>
+          <span class="oh-chevron">▾</span>
+        </button>
+        <div class="outside-body" id="outsideBody"></div>
+      </div>
+    </div>
+
+    <div class="balance-box" id="balanceBox">
+      <div class="balance-sum" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span id="balanceSumText">Balance is off by 142.18 USD <span class="ex-note">(example)</span></span>
+        <span>▾</span>
+      </div>
+      <div class="balance-cells" id="balanceCells">
+        <div class="bcell"><div class="l">Accounting beginning balance</div><div class="v">12,440.00 USD <span class="ex-note">ex.</span></div></div>
+        <div class="bop">+</div>
+        <div class="bcell"><div class="l">Increase</div><div class="v" id="balInc">119,695.40 USD</div></div>
+        <div class="bop">−</div>
+        <div class="bcell"><div class="l">Decrease</div><div class="v" id="balDec">116,575.93 USD</div></div>
+        <div class="bop">=</div>
+        <div class="bcell emph"><div class="l">Calculated ending balance</div><div class="v" id="balCalc">15,559.47 USD <span class="ex-note">ex.</span></div></div>
+        <div class="bcell"><div class="l">Accounting ending balance</div><div class="v" id="balEnd">15,417.29 USD <span class="ex-note">ex.</span></div></div>
+        <div class="bcell emph"><div class="l">Difference</div><div class="v" id="balDiff">142.18 USD <span class="ex-note">ex.</span></div></div>
+      </div>
+    </div>
+
+    <div class="warn-banner" id="warnBanner">
+      <span>⚠</span>
+      <span>Resolve all transactions in Missing source and Discrepancy to finish reconciliation.</span>
+      <button class="x" onclick="this.parentElement.classList.add('hidden')">×</button>
+    </div>
+
+    <div>
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-tab="matched" onclick="setTab(this)">Matched <span class="cnt ok" id="cMatched">718</span></button>
+        <button class="tab" data-tab="disc" onclick="setTab(this)">Discrepancy <span class="cnt warn" id="cDisc">2</span></button>
+        <button class="tab" data-tab="miss" onclick="setTab(this)">Missing source <span class="cnt fail" id="cMiss">13</span></button>
+        <button class="tab" data-tab="ign" onclick="setTab(this)">Ignored <span class="cnt def" id="cIgn">0</span></button>
+      </div>
+      <div class="filters">
+        <div class="field grow">
+          <label class="label">Search</label>
+          <input class="input" placeholder="Search">
+        </div>
+        <div class="field" style="min-width:200px">
+          <label class="label">Date range</label>
+          <div class="date-row" style="max-width:none">
+            <input class="input" placeholder="From">
+            <input class="input" placeholder="To">
+          </div>
+        </div>
+        <div class="field" style="min-width:160px">
+          <label class="label">Amount</label>
+          <div class="date-row" style="max-width:none">
+            <input class="input" placeholder="Min">
+            <input class="input" placeholder="Max">
+          </div>
+        </div>
+        <div class="field" style="min-width:120px">
+          <label class="label">Match type</label>
+          <select class="select"><option>All</option><option>Auto</option><option>Assisted</option><option>Manual</option></select>
+        </div>
+        <div class="field" style="min-width:100px">
+          <label class="label">Currency</label>
+          <select class="select"><option>All</option><option>USD</option></select>
+        </div>
+        <button class="btn-primary">Apply</button>
+        <button class="btn-text">Reset filters</button>
+      </div>
+      <div class="table-wrap">
+        <table class="res" id="resTable">
+          <thead>
+            <tr>
+              <th style="width:35px"></th>
+              <th style="width:35px"><input type="checkbox"></th>
+              <th>Date</th>
+              <th>Matching ID</th>
+              <th class="num">Total amount</th>
+              <th>Types</th>
+              <th>Match type</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody id="resBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Matched / discrepancy / missing counts marked <span class="ex-note">example</span> are estimates for books-side matching (full TR matcher not re-run).
+      Shopify-side payment rows &amp; amounts are from the Sep 2026 reports (org 100417).
+      Payouts ($131,184.61 net / 47) apply to Shopify Payments only.
+    </div>
+  </div>
+</div>
+
+<script>
+/* Real Sep 2026 routing (reports) + example books-side match counts */
+/* Outside clearing accounts — real Sep 2026 Net_payments splits (SUCCESS SALE/CAPTURE/REFUND, processed_at NY) */
+const OUTSIDE = {
+  settled: [
+    {
+      key: 'tiktok',
+      name: 'TikTok Shop',
+      gateway: 'tiktok_shop',
+      count: 55,
+      amount: 3848.71,
+      reason: 'Paid out by TikTok Shop',
+      group: 'settled',
+      payments: [
+        { date: 'Sep 29, 2026', order: '#13502', gateway: 'tiktok_shop', amount: 32.10 },
+        { date: 'Sep 27, 2026', order: '#13465', gateway: 'tiktok_shop', amount: 230.10 },
+        { date: 'Sep 24, 2026', order: '#13365', gateway: 'tiktok_shop', amount: 61.13 },
+        { date: 'Sep 24, 2026', order: '#13366', gateway: 'tiktok_shop', amount: 51.53 },
+      ],
+    },
+    {
+      key: 'afterpay',
+      name: 'Afterpay',
+      gateway: 'Afterpay US (New)',
+      count: 25,
+      amount: 4861.36,
+      reason: 'Paid out by Afterpay',
+      group: 'settled',
+      payments: [
+        { date: 'Sep 30, 2026', order: '#13512', gateway: 'Afterpay US (New)', amount: 150.00 },
+        { date: 'Sep 30, 2026', order: '#13510', gateway: 'Afterpay US (New)', amount: 91.60 },
+        { date: 'Sep 29, 2026', order: '#13488', gateway: 'Afterpay US (New)', amount: 190.00 },
+        { date: 'Sep 27, 2026', order: '#13472', gateway: 'Afterpay US (New)', amount: 581.98 },
+      ],
+    },
+  ],
+  excluded: [
+    {
+      key: 'gift_card',
+      name: 'Gift card',
+      gateway: 'gift_card',
+      count: 7,
+      amount: 648.05,
+      reason: 'Paid with previously collected money',
+      group: 'excluded',
+      payments: [
+        { date: 'Sep 28, 2026', order: '#13481', gateway: 'gift_card', amount: 100.00 },
+        { date: 'Sep 26, 2026', order: '#13432', gateway: 'gift_card', amount: 198.05 },
+        { date: 'Sep 12, 2026', order: '#13002', gateway: 'gift_card', amount: 100.00 },
+        { date: 'Sep 11, 2026', order: '#12945', gateway: 'gift_card', amount: 100.00 },
+      ],
+    },
+    {
+      key: 'store_credit',
+      name: 'Store credit',
+      gateway: 'shopify_store_credit',
+      count: 5,
+      amount: 220.00,
+      reason: 'Paid with previously collected money',
+      group: 'excluded',
+      payments: [
+        { date: 'Sep 25, 2026', order: '#13398', gateway: 'shopify_store_credit', amount: 10.00 },
+        { date: 'Sep 23, 2026', order: '#13348', gateway: 'shopify_store_credit', amount: 75.00 },
+        { date: 'Sep 7, 2026', order: '#12885', gateway: 'shopify_store_credit', amount: 50.00 },
+        { date: 'Sep 6, 2026', order: '#12846', gateway: 'shopify_store_credit', amount: 75.00 },
+      ],
+    },
+  ],
+  unknown: [], // Greenleaf Botanicals: 0 unrecognized this period
+};
+
+const DEMO_UNKNOWN = {
+  key: 'klarna_demo',
+  name: 'klarna_pay_later',
+  gateway: 'klarna_pay_later',
+  count: 2,
+  amount: 184.00,
+  reason: 'Needs a mapping — review',
+  group: 'unknown',
+  example: true,
+  payments: [
+    { date: 'Sep 18, 2026', order: '#13120', gateway: 'klarna_pay_later', amount: 99.00 },
+    { date: 'Sep 9, 2026', order: '#12901', gateway: 'klarna_pay_later', amount: 85.00 },
+  ],
+};
+
+let demoUnknown = false;
+
+function outsideTotals() {
+  const known = [...OUTSIDE.settled, ...OUTSIDE.excluded];
+  const unk = demoUnknown ? [DEMO_UNKNOWN] : OUTSIDE.unknown.slice();
+  const all = known.concat(unk);
+  const count = all.reduce((s, r) => s + r.count, 0);
+  const amount = all.reduce((s, r) => s + r.amount, 0);
+  return { count, amount, unknownCount: unk.reduce((s, r) => s + r.count, 0), unknownAmount: unk.reduce((s, r) => s + r.amount, 0), unknownRows: unk };
+}
+
+function fmtMoney(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function toggleOutsidePanel() {
+  document.getElementById('outsidePanel').classList.toggle('open');
+}
+
+function toggleDemoUnknown(on) {
+  demoUnknown = !!on;
+  renderOutsidePanel();
+}
+
+function toggleOutRow(btn) {
+  btn.classList.toggle('open');
+}
+
+function renderOutsidePanel() {
+  const panel = document.getElementById('outsidePanel');
+  if (!panel) return;
+  const t = outsideTotals();
+  const meta = document.getElementById('outsideMeta');
+  const warn = document.getElementById('outsideWarnChip');
+  meta.textContent = `${t.count.toLocaleString()} payments · ${fmtMoney(t.amount)}`;
+  const hasUnk = t.unknownCount > 0;
+  panel.classList.toggle('has-unknown', hasUnk);
+  warn.classList.toggle('hidden', !hasUnk);
+  if (hasUnk) warn.textContent = `${t.unknownCount} unknown`;
+
+  const body = document.getElementById('outsideBody');
+  const rowHtml = (r) => {
+    const unk = r.group === 'unknown';
+    const amtNote = r.example ? ' <span class="ex-note">(example)</span>' : '';
+    const payRows = (r.payments || []).map(p =>
+      `<tr><td>${p.date}</td><td>${p.order}</td><td>${p.gateway}</td><td class="num">${fmtMoney(p.amount)}</td></tr>`
+    ).join('');
+    return `
+      <button type="button" class="out-row${unk ? ' unknown-row' : ''}" data-key="${r.key}" onclick="toggleOutRow(this)">
+        <span class="or-chevron">▸</span>
+        <span>
+          <span class="or-name">${r.name}</span>
+          <span class="or-reason">${r.reason}</span>
+        </span>
+        <span class="or-count">${r.count} payment${r.count === 1 ? '' : 's'}</span>
+        <span class="or-amt">${fmtMoney(r.amount)}${amtNote}</span>
+      </button>
+      <div class="out-payments">
+        <table>
+          <thead><tr><th>Date</th><th>Order</th><th>Gateway</th><th class="num">Amount</th></tr></thead>
+          <tbody>${payRows}</tbody>
+        </table>
+      </div>`;
+  };
+
+  const unkRows = demoUnknown ? [DEMO_UNKNOWN] : OUTSIDE.unknown.slice();
+  const unkBlock = unkRows.length
+    ? unkRows.map(rowHtml).join('')
+    : `<div class="out-empty">No unrecognized gateways this period</div>`;
+
+  body.innerHTML = `
+    <div class="out-group">
+      <div class="out-group-label">Known — Settled outside Shopify</div>
+      ${OUTSIDE.settled.map(rowHtml).join('')}
+    </div>
+    <div class="out-group">
+      <div class="out-group-label">Known — Excluded (no new money)</div>
+      ${OUTSIDE.excluded.map(rowHtml).join('')}
+    </div>
+    <div class="out-group unknown">
+      <div class="out-group-label">Unknown — Unrecognized gateway</div>
+      ${unkBlock}
+    </div>`;
+}
+
+const ACCOUNTS = {
+  default: {
+    id: 'default',
+    name: 'Shopify clearing (required for Synder)',
+    extId: '1870412',
+    tab: 'Shopify Payments',
+    status: 'Attention required',
+    statusClass: 'status-fail',
+    payments: 733,
+    amount: 127280.66,
+    matched: 718, disc: 2, miss: 13, ign: 0,
+    example: true,
+    balanceOff: true,
+    balInc: '119,695.40 USD',
+    balDec: '116,575.93 USD',
+    rows: [
+      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…a1', amt: '248.00 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…b2', amt: '96.45 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 29, 2026', id: 'gid://shopify/OrderTransaction/…c3', amt: '412.10 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 28, 2026', id: 'payout-…47', amt: '4,812.33 USD', types: 'Deposit;TRANSFER', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 27, 2026', id: 'gid://shopify/OrderTransaction/…d4', amt: '55.00 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
+    ]
+  },
+  pos: {
+    id: 'pos',
+    name: 'Shopify POS Orders',
+    extId: '1870418',
+    tab: 'POS',
+    status: 'Reconciled',
+    statusClass: 'status-ok',
+    payments: 63,
+    amount: 2331.48,
+    matched: 63, disc: 0, miss: 0, ign: 0,
+    example: true,
+    balanceOff: false,
+    balInc: '2,331.48 USD',
+    balDec: '0.00 USD',
+    rows: [
+      { date: 'Sep 28, 2026', id: 'pos-cash-…01', amt: '84.00 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 22, 2026', id: 'pos-cash-…02', amt: '126.50 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 15, 2026', id: 'pos-mix-…03', amt: '19.64 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
+    ]
+  },
+  other: {
+    id: 'other',
+    name: 'Shopify Other Orders',
+    extId: '1870417',
+    tab: 'Other',
+    status: 'Attention required',
+    statusClass: 'status-fail',
+    payments: 16,
+    amount: 1343.79,
+    matched: 14, disc: 0, miss: 19, ign: 0,
+    example: true,
+    balanceOff: true,
+    balInc: '1,343.79 USD',
+    balDec: '0.00 USD',
+    note: 'Books show more OTHER_GATEWAYS rows than routed payments — gap under review.',
+    rows: [
+      { date: 'Sep 24, 2026', id: 'etsy-…11', amt: '68.00 USD', types: 'Sales Receipt;OTHER_GATEWAYS', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 18, 2026', id: 'whatnot-…12', amt: '112.40 USD', types: 'Sales Receipt;OTHER_GATEWAYS', mt: 'Auto', cnt: 2 },
+    ]
+  },
+  manual: {
+    id: 'manual',
+    name: 'Shopify Manual Orders',
+    extId: '1870416',
+    tab: 'Manual',
+    status: 'Reconciled',
+    statusClass: 'status-ok',
+    payments: 3,
+    amount: 270.15,
+    matched: 3, disc: 0, miss: 0, ign: 0,
+    example: true,
+    balanceOff: false,
+    balInc: '270.15 USD',
+    balDec: '0.00 USD',
+    rows: [
+      { date: 'Sep 12, 2026', id: 'manual-…21', amt: '120.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 8, 2026', id: 'manual-…22', amt: '95.15 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 3, 2026', id: 'manual-…23', amt: '55.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
+    ]
+  }
+};
+
+const ORDER = ['default', 'pos', 'manual', 'other'];
+let modeAll = false;
+let currentAcct = 'default';
+
+function onIntegrationChange() {
+  const v = document.getElementById('selIntegration').value;
+  const isShopify = v === 'shopify';
+  document.getElementById('scopeBlock').classList.toggle('hidden', !isShopify);
+  if (!isShopify) {
+    document.querySelector('input[name="scope"][value="sp"]').checked = true;
+    onScopeChange();
+  }
+}
+
+function onScopeChange() {
+  const all = document.querySelector('input[name="scope"]:checked').value === 'all';
+  document.getElementById('optSp').classList.toggle('on', !all);
+  document.getElementById('optAll').classList.toggle('on', all);
+  document.getElementById('singleAccountBlock').classList.toggle('hidden', all);
+  document.getElementById('allAccountsBlock').classList.toggle('hidden', !all);
+}
+
+function onRun() {
+  const integ = document.getElementById('selIntegration').value;
+  if (!integ) return;
+  modeAll = integ === 'shopify' && document.querySelector('input[name="scope"]:checked').value === 'all';
+  if (modeAll) {
+    runAll();
+  } else {
+    // single-account path — today's results for Default
+    modeAll = false;
+    populateSwitch(false);
+    currentAcct = 'default';
+    renderAccount(ACCOUNTS.default);
+    document.getElementById('bucketStripWrap').classList.add('hidden');
+    document.getElementById('acctSwitchWrap').classList.add('hidden');
+    showScreen('results');
+  }
+}
+
+function runAll() {
+  modeAll = true;
+  populateSwitch(true);
+  currentAcct = 'default';
+  renderAccount(ACCOUNTS.default);
+  document.getElementById('bucketStripWrap').classList.remove('hidden');
+  document.getElementById('acctSwitchWrap').classList.remove('hidden');
+  document.getElementById('outsidePanel').classList.add('open');
+  renderOutsidePanel();
+  showScreen('results');
+}
+
+function statusChipHtml(status, statusClass) {
+  return `<span class="status ${statusClass}">${status}</span>`;
+}
+
+function openCount(a) {
+  return (a.disc || 0) + (a.miss || 0);
+}
+
+function populateSwitch(all) {
+  const wrap = document.getElementById('acctBtns');
+  wrap.innerHTML = '';
+
+  if (all) {
+    const ov = document.createElement('button');
+    ov.type = 'button';
+    ov.className = 'acct-btn overview-btn';
+    ov.dataset.key = 'overview';
+    ov.innerHTML = `
+      <span class="ab-name">All accounts — overview</span>
+      <span class="ab-meta"><span class="ab-open">4 clearing accounts</span></span>`;
+    ov.onclick = () => selectAccount('overview');
+    wrap.appendChild(ov);
+  }
+
+  ORDER.forEach(k => {
+    const a = ACCOUNTS[k];
+    const open = openCount(a);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'acct-btn' + (k === currentAcct ? ' on' : '');
+    btn.dataset.key = k;
+    const openHtml = open
+      ? `<span class="ab-open">${open} open</span>`
+      : `<span class="ab-open">0 open</span>`;
+    btn.innerHTML = `
+      <span class="ab-name" title="${a.tab}">${a.tab}</span>
+      <span class="ab-meta">
+        ${statusChipHtml(a.status, a.statusClass)}
+        ${openHtml}
+      </span>`;
+    btn.onclick = () => selectAccount(k);
+    wrap.appendChild(btn);
+  });
+  highlightSwitch(currentAcct);
+}
+
+function highlightSwitch(key) {
+  document.querySelectorAll('#acctBtns .acct-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.key === key);
+  });
+}
+
+function selectAccount(key) {
+  highlightSwitch(key);
+  if (key === 'overview') {
+    currentAcct = 'overview';
+    renderOverview();
+  } else {
+    currentAcct = key;
+    renderAccount(ACCOUNTS[key]);
+  }
+}
+
+function onAccountSwitch() {
+  /* kept for any leftover callers; prefer selectAccount */
+  selectAccount(currentAcct);
+}
+
+function renderOverview() {
+  highlightSwitch('overview');
+  document.getElementById('resTitle').textContent = 'All clearing accounts';
+  document.getElementById('resStatus').className = 'status status-fail';
+  document.getElementById('resStatus').textContent = 'Attention required';
+  document.getElementById('resSub').textContent = 'Greenleaf Botanicals (Shopify) / Sep 1 – 30, 2026 · 4 accounts';
+  document.getElementById('bucketStripWrap').classList.remove('hidden');
+  renderOutsidePanel();
+  document.getElementById('balanceBox').classList.add('hidden');
+  document.getElementById('warnBanner').classList.add('hidden');
+
+  let m=0,d=0,mi=0,ig=0;
+  ORDER.forEach(k => { const a=ACCOUNTS[k]; m+=a.matched; d+=a.disc; mi+=a.miss; ig+=a.ign; });
+  setCounts(m,d,mi,ig);
+
+  const body = document.getElementById('resBody');
+  body.innerHTML = ORDER.map(k => {
+    const a = ACCOUNTS[k];
+    const open = a.disc + a.miss;
+    return `<tr style="cursor:pointer" onclick="selectAccount('${k}')">
+      <td></td><td></td>
+      <td colspan="1"><b>${a.tab}</b></td>
+      <td>${a.name}</td>
+      <td class="num">${fmt(a.amount)} USD <span class="ex-note">${a.payments} payments</span></td>
+      <td>${open ? '<span class="status status-fail">Attention required</span>' : '<span class="status status-ok">Reconciled</span>'}</td>
+      <td>${a.matched} matched</td>
+      <td>${open} open <span class="ex-note">ex.</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAccount(a) {
+  highlightSwitch(a.id);
+  document.getElementById('resTitle').textContent = a.name;
+  document.getElementById('resStatus').className = 'status ' + a.statusClass;
+  document.getElementById('resStatus').textContent = a.status;
+  document.getElementById('resSub').textContent =
+    `Greenleaf Botanicals (Shopify) / Sep 1 – 30, 2026 · ${a.tab} · ${a.payments} payments · ${fmt(a.amount)} USD`;
+  if (modeAll) {
+    document.getElementById('bucketStripWrap').classList.remove('hidden');
+    renderOutsidePanel();
+  }
+  document.getElementById('balanceBox').classList.remove('hidden');
+  document.getElementById('balanceBox').classList.toggle('ok', !a.balanceOff);
+  document.getElementById('balanceSumText').innerHTML = a.balanceOff
+    ? `Balance is off by 142.18 USD <span class="ex-note">(example)</span>`
+    : `Balance matches`;
+  document.getElementById('balInc').textContent = a.balInc;
+  document.getElementById('balDec').textContent = a.balDec;
+  document.getElementById('warnBanner').classList.toggle('hidden', a.disc + a.miss === 0);
+  setCounts(a.matched, a.disc, a.miss, a.ign);
+
+  const body = document.getElementById('resBody');
+  body.innerHTML = a.rows.map(r => `
+    <tr>
+      <td>›</td>
+      <td><input type="checkbox"></td>
+      <td>${r.date}</td>
+      <td>${r.id}</td>
+      <td class="num">${r.amt}</td>
+      <td>${r.types}</td>
+      <td>${r.mt}</td>
+      <td>${r.cnt}</td>
+    </tr>`).join('') +
+    (a.example ? `<tr><td colspan="8" class="muted"><span class="ex-note">Sample rows · books-side match counts are example estimates · Shopify payment totals are real</span></td></tr>` : '');
+}
+
+function setCounts(m,d,mi,ig) {
+  document.getElementById('cMatched').textContent = m.toLocaleString();
+  document.getElementById('cDisc').textContent = d.toLocaleString();
+  document.getElementById('cMiss').textContent = mi.toLocaleString();
+  document.getElementById('cIgn').textContent = ig.toLocaleString();
+}
+
+function setTab(el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function showScreen(which) {
+  document.getElementById('screen-run').classList.toggle('hidden', which !== 'run');
+  document.getElementById('screen-results').classList.toggle('hidden', which !== 'results');
+  window.scrollTo(0,0);
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// init
+onScopeChange();
+renderOutsidePanel();
+</script>
+</body>
+</html>
