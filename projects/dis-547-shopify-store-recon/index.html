@@ -713,19 +713,6 @@
       </div>
     </div>
 
-    <!-- NEW: Outside clearing accounts accordion -->
-    <div class="new-wrap hidden" id="bucketStripWrap">
-      <span class="new-badge">NEW</span>
-      <div class="outside-panel open" id="outsidePanel">
-        <button type="button" class="outside-head" id="outsideHead" onclick="toggleOutsidePanel()">
-          <span class="oh-title">Outside clearing accounts</span>
-          <span class="oh-meta" id="outsideMeta">92 payments · $9,578.12</span>
-          <span class="status status-warn hidden" id="outsideWarnChip">Needs review</span>
-          <span class="oh-chevron">▾</span>
-        </button>
-        <div class="outside-body" id="outsideBody"></div>
-      </div>
-    </div>
 
     <div class="balance-box" id="balanceBox">
       <div class="balance-sum" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -804,6 +791,20 @@
           </thead>
           <tbody id="resBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- NEW: Outside clearing accounts accordion -->
+    <div class="new-wrap hidden" id="bucketStripWrap" style="margin-top:24px">
+      <span class="new-badge">NEW</span>
+      <div class="outside-panel open" id="outsidePanel">
+        <button type="button" class="outside-head" id="outsideHead" onclick="toggleOutsidePanel()">
+          <span class="oh-title">Outside clearing accounts</span>
+          <span class="oh-meta" id="outsideMeta">92 payments · $9,578.12</span>
+          <span class="status status-warn hidden" id="outsideWarnChip">Needs review</span>
+          <span class="oh-chevron">▾</span>
+        </button>
+        <div class="outside-body" id="outsideBody"></div>
       </div>
     </div>
 
