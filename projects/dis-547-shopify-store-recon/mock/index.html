@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DIS-547 v2 — TR prototype (identical UI + new bits only)</title>
+<title>DIS-547 v3 — TR prototype (identical UI + new bits only)</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -480,6 +480,16 @@
     font-size: 11px; color: var(--grey-50); font-style: italic;
   }
 
+  /* v3: inline NEW tag (for small additions inside existing elements) */
+  .new-tag {
+    display: none; margin-left: 6px; vertical-align: middle;
+    background: #9B59B6; color: #fff; font-size: 9px; font-weight: 700;
+    letter-spacing: .04em; padding: 0 5px; border-radius: 3px; line-height: 15px;
+  }
+  body.show-new .new-tag { display: inline-block; }
+  body.show-new .new-col { background: rgba(155,89,182,.05); }
+  .pm-split { display: block; font-size: 11px; color: var(--grey-50); }
+  table.res:not(.with-refund-id) .col-refund { display: none; }
   .hidden { display: none !important; }
   .footer-note {
     margin-top: 24px; padding: 10px 12px;
@@ -493,7 +503,7 @@
 <!-- Prototype controls (not product UI) -->
 <div class="proto-bar">
   <a href="../" style="color:#cbd5e1;text-decoration:none;margin-right:8px">&larr; Back to overview</a>
-  <b>DIS-547 prototype v2</b>
+  <b>DIS-547 prototype v3</b>
   <span class="sep"></span>
   <label><input type="checkbox" id="togNew" checked onchange="document.body.classList.toggle('show-new', this.checked)"> Show NEW markers</label>
   <span class="sep"></span>
@@ -536,6 +546,7 @@
         <span class="date-sep">–</span>
         <div class="field"><input class="input" value="09/30/2026" readonly></div>
       </div>
+      <div class="hint">By payment date — payments made in this period are included even if the order was created earlier.<span class="new-tag">NEW</span></div>
     </div>
 
     <div class="cols">
@@ -671,7 +682,7 @@
 
     <div class="footer-note">
       Prototype · layout/labels from synder-ui TransactionReconciliation (ReconciliationCreateHeader, IntegrationSelectAccount, ReconciliationModeSelect, ResultListTabs, …).
-      Account <i>names</i> are Synder-style labels — Pharos settings for org 100417 only returned external ids (1870412/52/53/54), not QBO display names.
+      Account <i>names</i> are Synder-style labels — Pharos settings for org 100417 only returned external ids (1870412/16/17/18), not QBO display names.
       Button label follows live code (<b>Run reconciliation</b>); some Help Center screenshots still show “Start matching”.
     </div>
   </div>
@@ -733,6 +744,16 @@
       </div>
     </div>
 
+    <!-- NEW v3: settings vs books mismatch (POS cash refunds) -->
+    <div class="new-wrap hidden" id="settingsMismatchWrap">
+      <span class="new-badge">NEW</span>
+      <div class="warn-banner" style="margin-bottom:0">
+        <span>⚠</span>
+        <span id="settingsMismatchText"></span>
+        <a class="link" style="margin-left:auto;white-space:nowrap">Open Shopify settings</a>
+      </div>
+    </div>
+
     <div class="warn-banner" id="warnBanner">
       <span>⚠</span>
       <span>Resolve all transactions in Missing source and Discrepancy to finish reconciliation.</span>
@@ -784,8 +805,10 @@
               <th style="width:35px"><input type="checkbox"></th>
               <th>Date</th>
               <th>Matching ID</th>
+              <th class="new-col col-refund">Refund ID<span class="new-tag">NEW</span></th>
               <th class="num">Total amount</th>
               <th>Types</th>
+              <th class="new-col">Payment method<span class="new-tag">NEW</span></th>
               <th>Match type</th>
               <th>Count</th>
             </tr>
@@ -812,7 +835,8 @@
     <div class="footer-note">
       Matched / discrepancy / missing counts marked <span class="ex-note">example</span> are estimates for books-side matching (full TR matcher not re-run).
       Shopify-side payment rows &amp; amounts are from the Sep 2026 reports (org 100417).
-      Payouts ($131,184.61 net / 47) apply to Shopify Payments only.
+      Payouts ($131,184.61 net / 47) apply to Shopify Payments only.<br>
+      v3 additions (rows marked <span class="ex-note">example</span>: PayPal, split POS order, POS cash refund, August-order payment) use figures from a second, per-transaction test store (org 100388, Sep 2026), to show the four rules from that check: PayPal settled outside · split POS payments routed by payment method · refund ID for POS cash refunds · period by payment date.
     </div>
   </div>
 </div>
@@ -850,6 +874,23 @@ const OUTSIDE = {
         { date: 'Sep 30, 2026', order: '#13510', gateway: 'Afterpay US (New)', amount: 91.60 },
         { date: 'Sep 29, 2026', order: '#13488', gateway: 'Afterpay US (New)', amount: 190.00 },
         { date: 'Sep 27, 2026', order: '#13472', gateway: 'Afterpay US (New)', amount: 581.98 },
+      ],
+    },
+    {
+      key: 'paypal',
+      name: 'PayPal',
+      gateway: 'paypal',
+      count: 132,
+      amount: 20436.05,
+      reason: 'Synced by your PayPal connection — not in the Shopify clearing account',
+      group: 'settled',
+      example: true,
+      newRule: true,
+      payments: [
+        { date: 'Sep 30, 2026', order: '#K14-270912', gateway: 'paypal', amount: 330.19 },
+        { date: 'Sep 30, 2026', order: '#K14-270908', gateway: 'paypal', amount: 284.63 },
+        { date: 'Sep 30, 2026', order: '#K14-270904', gateway: 'paypal', amount: 468.68 },
+        { date: 'Sep 30, 2026', order: '#K14-270868', gateway: 'paypal', amount: 651.04 },
       ],
     },
   ],
@@ -954,7 +995,7 @@ function renderOutsidePanel() {
       <button type="button" class="out-row${unk ? ' unknown-row' : ''}" data-key="${r.key}" onclick="toggleOutRow(this)">
         <span class="or-chevron">▸</span>
         <span>
-          <span class="or-name">${r.name}</span>
+          <span class="or-name">${r.name}${r.newRule ? '<span class="new-tag">NEW</span>' : ''}</span>
           <span class="or-reason">${r.reason}</span>
         </span>
         <span class="or-count">${r.count} payment${r.count === 1 ? '' : 's'}</span>
@@ -1004,11 +1045,13 @@ const ACCOUNTS = {
     balInc: '119,695.40 USD',
     balDec: '116,575.93 USD',
     rows: [
-      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…a1', amt: '248.00 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
-      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…b2', amt: '96.45 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
-      { date: 'Sep 29, 2026', id: 'gid://shopify/OrderTransaction/…c3', amt: '412.10 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
-      { date: 'Sep 28, 2026', id: 'payout-…47', amt: '4,812.33 USD', types: 'Deposit;TRANSFER', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 27, 2026', id: 'gid://shopify/OrderTransaction/…d4', amt: '55.00 USD', types: 'Payment;Expense;CHARGE', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…a1', amt: '248.00 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 30, 2026', id: 'gid://shopify/OrderTransaction/…b2', amt: '96.45 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 29, 2026', id: 'gid://shopify/OrderTransaction/…c3', amt: '412.10 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 29, 2026', id: 'gid://shopify/OrderTransaction/…e5', amt: '150.00 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', split: 'POS order #K14-270743 · card part (cash part → POS)', mt: 'Auto', cnt: 3, ex: true },
+      { date: 'Sep 28, 2026', id: 'payout-…47', amt: '4,812.33 USD', types: 'Deposit;TRANSFER', pm: '—', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 27, 2026', id: 'gid://shopify/OrderTransaction/…d4', amt: '55.00 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', mt: 'Auto', cnt: 3 },
+      { date: 'Sep 3, 2026', id: 'gid://shopify/OrderTransaction/…f6', amt: '310.00 USD', types: 'Payment;Expense;CHARGE', pm: 'Shopify Payments (card)', note: 'order created Aug 28 — included by payment date', mt: 'Auto', cnt: 3, ex: true },
     ]
   },
   pos: {
@@ -1025,10 +1068,14 @@ const ACCOUNTS = {
     balanceOff: false,
     balInc: '2,331.48 USD',
     balDec: '0.00 USD',
+    showRefundId: true,
+    settingsMismatch: '1 POS cash refund (−474.10 USD <span class="ex-note">example</span>) is in this account in your books, but your Shopify settings send POS refunds to a separate POS refunds account. Matched by refund ID.',
     rows: [
-      { date: 'Sep 28, 2026', id: 'pos-cash-…01', amt: '84.00 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 22, 2026', id: 'pos-cash-…02', amt: '126.50 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 15, 2026', id: 'pos-mix-…03', amt: '19.64 USD', types: 'Sales Receipt;POS_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 29, 2026', id: 'pos-cash-…04', amt: '96.80 USD', types: 'Sales Receipt;POS_CHARGE', pm: 'Cash', split: 'POS order #K14-270743 · cash part (card part → Shopify Payments)', mt: 'Auto', cnt: 2, ex: true },
+      { date: 'Sep 28, 2026', id: 'pos-cash-…01', amt: '84.00 USD', types: 'Sales Receipt;POS_CHARGE', pm: 'Cash', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 28, 2026', id: '2204815529417', refundId: '2204815529417', amt: '−474.10 USD', types: 'Refund;POS_CHARGE_REFUND', pm: 'Cash', mt: 'Auto', cnt: 3, ex: true },
+      { date: 'Sep 22, 2026', id: 'pos-cash-…02', amt: '126.50 USD', types: 'Sales Receipt;POS_CHARGE', pm: 'Cash', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 15, 2026', id: 'pos-mix-…03', amt: '19.64 USD', types: 'Sales Receipt;POS_CHARGE', pm: 'Cash', mt: 'Auto', cnt: 2 },
     ]
   },
   other: {
@@ -1047,8 +1094,8 @@ const ACCOUNTS = {
     balDec: '0.00 USD',
     note: 'Books show more OTHER_GATEWAYS rows than routed payments — gap under review.',
     rows: [
-      { date: 'Sep 24, 2026', id: 'etsy-…11', amt: '68.00 USD', types: 'Sales Receipt;OTHER_GATEWAYS', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 18, 2026', id: 'whatnot-…12', amt: '112.40 USD', types: 'Sales Receipt;OTHER_GATEWAYS', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 24, 2026', id: 'etsy-…11', amt: '68.00 USD', types: 'Sales Receipt;OTHER_GATEWAYS', pm: 'Other gateway', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 18, 2026', id: 'whatnot-…12', amt: '112.40 USD', types: 'Sales Receipt;OTHER_GATEWAYS', pm: 'Other gateway', mt: 'Auto', cnt: 2 },
     ]
   },
   manual: {
@@ -1066,9 +1113,9 @@ const ACCOUNTS = {
     balInc: '270.15 USD',
     balDec: '0.00 USD',
     rows: [
-      { date: 'Sep 12, 2026', id: 'manual-…21', amt: '120.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 8, 2026', id: 'manual-…22', amt: '95.15 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
-      { date: 'Sep 3, 2026', id: 'manual-…23', amt: '55.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 12, 2026', id: 'manual-…21', amt: '120.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', pm: 'Manual', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 8, 2026', id: 'manual-…22', amt: '95.15 USD', types: 'Sales Receipt;MANUAL_CHARGE', pm: 'Manual', mt: 'Auto', cnt: 2 },
+      { date: 'Sep 3, 2026', id: 'manual-…23', amt: '55.00 USD', types: 'Sales Receipt;MANUAL_CHARGE', pm: 'Manual', mt: 'Auto', cnt: 2 },
     ]
   }
 };
@@ -1208,6 +1255,8 @@ function renderOverview() {
   ORDER.forEach(k => { const a=ACCOUNTS[k]; m+=a.matched; d+=a.disc; mi+=a.miss; ig+=a.ign; });
   setCounts(m,d,mi,ig);
 
+  document.getElementById('resTable').classList.remove('with-refund-id');
+  document.getElementById('settingsMismatchWrap').classList.add('hidden');
   const body = document.getElementById('resBody');
   body.innerHTML = ORDER.map(k => {
     const a = ACCOUNTS[k];
@@ -1216,7 +1265,9 @@ function renderOverview() {
       <td></td><td></td>
       <td colspan="1"><b>${a.tab}</b></td>
       <td>${a.name}</td>
+      <td class="col-refund"></td>
       <td class="num">${fmt(a.amount)} USD <span class="ex-note">${a.payments} payments</span></td>
+      <td></td>
       <td>${open ? '<span class="status status-fail">Attention required</span>' : '<span class="status status-ok">Reconciled</span>'}</td>
       <td>${a.matched} matched</td>
       <td>${open} open <span class="ex-note">ex.</span></td>
@@ -1244,20 +1295,26 @@ function renderAccount(a) {
   document.getElementById('balDec').textContent = a.balDec;
   document.getElementById('warnBanner').classList.toggle('hidden', a.disc + a.miss === 0);
   setCounts(a.matched, a.disc, a.miss, a.ign);
+  document.getElementById('resTable').classList.toggle('with-refund-id', !!a.showRefundId);
+  const mm = document.getElementById('settingsMismatchWrap');
+  mm.classList.toggle('hidden', !(modeAll && a.settingsMismatch));
+  if (a.settingsMismatch) document.getElementById('settingsMismatchText').innerHTML = a.settingsMismatch;
 
   const body = document.getElementById('resBody');
   body.innerHTML = a.rows.map(r => `
     <tr>
       <td>›</td>
       <td><input type="checkbox"></td>
-      <td>${r.date}</td>
+      <td>${r.date}${r.note ? `<span class="pm-split">${r.note}</span>` : ''}</td>
       <td>${r.id}</td>
+      <td class="col-refund">${r.refundId || ''}</td>
       <td class="num">${r.amt}</td>
       <td>${r.types}</td>
+      <td>${r.pm || ''}${r.split ? `<span class="pm-split">${r.split}</span>` : ''}${r.ex ? ' <span class="ex-note">example</span>' : ''}</td>
       <td>${r.mt}</td>
       <td>${r.cnt}</td>
     </tr>`).join('') +
-    (a.example ? `<tr><td colspan="8" class="muted"><span class="ex-note">Sample rows · books-side match counts are example estimates · Shopify payment totals are real</span></td></tr>` : '');
+    (a.example ? `<tr><td colspan="10" class="muted"><span class="ex-note">Sample rows · books-side match counts are example estimates · Shopify payment totals are real</span></td></tr>` : '');
 }
 
 function setCounts(m,d,mi,ig) {
