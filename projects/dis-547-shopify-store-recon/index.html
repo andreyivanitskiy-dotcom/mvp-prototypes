@@ -11,20 +11,34 @@
 <body class="bg-slate-50 min-h-screen">
 <main class="max-w-3xl mx-auto px-6 py-16">
   <a href="../../" class="text-sm text-slate-500 hover:text-slate-800">&larr; All prototypes</a>
-  <h1 class="text-2xl font-bold text-slate-900 mt-4">DIS-547 — Shopify: reconcile all clearing accounts of a store</h1>
-  <p class="text-slate-600 mt-2">Today's Shopify reconciliation, plus a choice before Run: Shopify Payments only, or all clearing accounts of the store. With "All", results switch between accounts, and payments outside clearing accounts are listed below the results.</p>
+  <h1 class="text-2xl font-bold text-slate-900 mt-4">DIS-547 — Shopify: reconcile all clearing accounts at once</h1>
+  <p class="text-slate-600 mt-2">Today's Shopify reconciliation, plus a new "What to reconcile" choice before Run: one clearing account of your choice (Shopify Payments, POS, Manual, or Other), or all clearing accounts of the store in one run. This version follows the Story <a href="https://cloudbusinessllc.atlassian.net/browse/SET-1612" class="text-blue-600 hover:underline">SET-1612</a> (draft v3).</p>
   <a href="mock/" class="inline-block mt-6 bg-blue-600 text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:bg-blue-500">Open mock &rarr;</a>
-  <a href="v2/" class="block mt-3 text-sm text-slate-500 hover:text-slate-800">Previous version (v2)</a>
+  <a href="v3/" class="block mt-3 text-sm text-slate-500 hover:text-slate-800">Previous version (v3)</a>
+  <a href="v2/" class="block mt-1 text-sm text-slate-500 hover:text-slate-800">Previous version (v2)</a>
   <div class="mt-8 bg-white border border-slate-200 rounded-xl p-5 text-sm text-slate-700">
-    <div class="font-semibold text-slate-900 mb-2">Contents</div>
+    <div class="font-semibold text-slate-900 mb-2">What to try in the mock</div>
     <ul class="list-disc pl-5 space-y-1">
-      <li>Run form identical to today's, with the new "What to reconcile" choice and an auto-filled account list from sync settings</li>
-      <li>Results screen identical to today's, with clickable account buttons showing each account's reconciliation status</li>
-      <li>"Outside clearing accounts" panel: settled outside Shopify, excluded, and unrecognized gateways</li>
-      <li>v3: rules from a second test store — PayPal shown as settled outside, split POS payments sorted by payment method, refund ID for POS cash refunds, period counted by payment date</li>
-      <li>NEW markers (toggleable) show exactly what was added; data is anonymized</li>
+      <li><b>One clearing account:</b> keep "One clearing account", pick Shopify Payments (same as today), POS, Manual, or Other, and click Run reconciliation. The results show that account only.</li>
+      <li><b>All clearing accounts:</b> select "All clearing accounts of this store" and click Run reconciliation. The results show one button per account with its status, an overview, and the "Outside clearing accounts" panel.</li>
+      <li><b>Xero:</b> switch "Books" to Xero in the top bar. The Shopify side stays automatic. For the books side, you upload one Account Transactions report that covers all clearing accounts (click the upload area to simulate it). QuickBooks Online stays fully automatic.</li>
+      <li><b>No POS account in settings:</b> turn on the demo in the top bar. POS is not offered as a single account, the form shows that POS has no clearing account, and the results show POS payments as "Unassigned" with a link to the settings.</li>
     </ul>
   </div>
+  <div class="mt-4 bg-white border border-slate-200 rounded-xl p-5 text-sm text-slate-700">
+    <div class="font-semibold text-slate-900 mb-2">Business rules shown</div>
+    <ul class="list-disc pl-5 space-y-1">
+      <li>The list of clearing accounts comes from the store's Shopify sync settings as they are when the run starts. The user does not map accounts.</li>
+      <li>Available on every plan that has reconciliation.</li>
+      <li>PayPal and other payments that a different integration syncs: "Settled outside Shopify".</li>
+      <li>Gift cards and store credit: "Excluded".</li>
+      <li>Order types with no clearing account: "Unassigned", with a link to the settings.</li>
+      <li>POS order paid partly by card and partly by cash: the card part goes to Shopify Payments, the cash part goes to POS.</li>
+      <li>POS cash refunds are matched by refund ID, with a warning when the books and the settings use different accounts.</li>
+      <li>The period goes by payment date, not by order date.</li>
+    </ul>
+  </div>
+  <p class="mt-4 text-xs text-slate-500">The UI is identical to today's Transaction Reconciliation; NEW markers (toggle in the top bar) show what was added. All store names, IDs, and amounts are anonymized.</p>
 </main>
 </body>
 </html>

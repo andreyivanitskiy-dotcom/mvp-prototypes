@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DIS-547 v3 — TR prototype (identical UI + new bits only)</title>
+<title>DIS-547 v4 — TR prototype (identical UI + new bits only)</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -491,6 +491,43 @@
   .pm-split { display: block; font-size: 11px; color: var(--grey-50); }
   table.res:not(.with-refund-id) .col-refund { display: none; }
   .hidden { display: none !important; }
+
+  /* v4: Xero books side (existing Assisted upload pattern) */
+  .platform-ico.xero { background: #13B5EA; }
+  .acc-howto { margin-top: 16px; border: var(--border); border-radius: 4px; }
+  .acc-howto-head {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border: 0; padding: 12px 16px; cursor: pointer; font-weight: 500; text-align: left;
+  }
+  .acc-howto-body { padding: 0 16px 12px; font-size: 14px; }
+  .acc-howto:not(.open) .acc-howto-body { display: none; }
+  .acc-howto.open .acc-howto-head .chev { transform: rotate(180deg); }
+  .acc-howto ol { margin: 0; padding-left: 20px; }
+  .acc-howto li { margin-bottom: 4px; }
+  .acc-howto .divider { height: 1px; background: var(--grey-20); margin: 12px 0; }
+  .dropzone {
+    margin-top: 14px; border: 1px dashed var(--grey-30); border-radius: 4px;
+    padding: 20px 16px; text-align: center; cursor: pointer; background: #fff;
+  }
+  .dropzone:hover { border-color: var(--primary); background: var(--primary-5); }
+  .dropzone .dz-main { font-weight: 500; }
+  .dropzone .dz-main a { color: var(--primary); }
+  .dropzone .dz-sub { font-size: 12px; color: var(--grey-50); margin-top: 4px; }
+  .dropzone.err { border-color: var(--err); }
+  .field-error { font-size: 12px; color: var(--err); margin-top: 4px; }
+  .file-info {
+    margin-top: 14px; border: var(--border); border-radius: 4px; padding: 12px 8px 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .file-info .xl { width: 24px; height: 24px; border-radius: 3px; background: #1D6F42; color: #fff;
+    font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .file-info .fn { font-weight: 500; flex: 1; }
+  .file-info .fs { color: var(--grey-50); }
+  .file-info .del { border: 0; background: transparent; cursor: pointer; color: var(--grey-50); font-size: 16px; }
+  .file-accts { margin-top: 8px; font-size: 12px; color: var(--grey-50); }
+  .file-accts div::before { content: "✓ "; color: var(--ok); }
+  .acct-list-row.missing .name { color: var(--grey-50); font-weight: 400; font-style: italic; }
+  .proto-bar select { font-size: 12px; padding: 1px 4px; border-radius: 3px; }
   .footer-note {
     margin-top: 24px; padding: 10px 12px;
     background: var(--grey-5); border-radius: 4px;
@@ -503,16 +540,20 @@
 <!-- Prototype controls (not product UI) -->
 <div class="proto-bar">
   <a href="../" style="color:#cbd5e1;text-decoration:none;margin-right:8px">&larr; Back to overview</a>
-  <b>DIS-547 prototype v3</b>
+  <b>DIS-547 prototype v4</b>
   <span class="sep"></span>
   <label><input type="checkbox" id="togNew" checked onchange="document.body.classList.toggle('show-new', this.checked)"> Show NEW markers</label>
   <span class="sep"></span>
-  <label><input type="checkbox" id="togUnknown" onchange="toggleDemoUnknown(this.checked)"> Demo: show an unknown gateway</label>
+  <label>Books: <select id="selBooks" onchange="setBooks(this.value)"><option value="qbo" selected>QuickBooks Online</option><option value="xero">Xero</option></select></label>
   <span class="sep"></span>
-  <span>Org 100417 · Greenleaf Botanicals · Sep 1–30 2026</span>
+  <label><input type="checkbox" id="togNoPos" onchange="toggleNoPos(this.checked)"> Demo: no POS account</label>
+  <span class="sep"></span>
+  <label><input type="checkbox" id="togUnknown" onchange="toggleDemoUnknown(this.checked)"> Demo: unknown gateway</label>
+  <span class="sep"></span>
+  <span>Greenleaf Botanicals · Sep 2026</span>
   <span class="sep"></span>
   <a href="#" onclick="showScreen('run');return false">Run form</a>
-  <a href="#" onclick="runAll();return false">→ Results (All accounts)</a>
+  <a href="#" onclick="runAll();return false">→ Results (All)</a>
 </div>
 
 <!-- ===================== RUN FORM ===================== -->
@@ -556,23 +597,67 @@
         <div class="stack-field first">
           <p class="sub-label">Platform</p>
           <div class="platform-row">
-            <span class="platform-ico" title="QuickBooks Online">qb</span>
-            <span>Greenleaf Botanicals (QuickBooks Online)</span>
+            <span class="platform-ico" id="accIco" title="QuickBooks Online">qb</span>
+            <span id="accPlatName">Greenleaf Botanicals (QuickBooks Online)</span>
           </div>
         </div>
         <div class="stack-field">
           <label class="label">Import method<span class="req">*</span></label>
-          <select class="select"><option>Automated</option></select>
+          <select class="select" id="accMode"><option>Automated</option></select>
         </div>
-        <div class="info-box">
+        <div class="info-box" id="accAutoInfo">
           Synder will automatically retrieve the necessary files for you and will map the data according to these
           <a class="link">matching rules</a>.
         </div>
+
+        <!-- Xero: existing Assisted upload (Account Transactions), v4 = one file for all clearing accounts -->
+        <div class="hidden" id="xeroUploadBlock">
+          <div class="acc-howto open" id="xeroHowTo">
+            <button type="button" class="acc-howto-head" onclick="document.getElementById('xeroHowTo').classList.toggle('open')">
+              <span>How to get Account Transactions from Xero</span><span class="chev">▾</span>
+            </button>
+            <div class="acc-howto-body">
+              <ol>
+                <li>Open Xero Reporting <a class="link">reporting.xero.com</a> → Account Transactions</li>
+                <li id="xeroStepAccts">Select accounts: <b>all Shopify clearing accounts of this store</b><span class="new-tag">NEW</span> (<span id="xeroAcctNames">Shopify Payments, POS, Manual, Other</span>), Accounts Receivable, Accounts Payable, Realized Currency Gains</li>
+                <li>Pick the date range that matches the reconciliation date range</li>
+                <li>Set Grouping to Group by Account</li>
+                <li>Select columns: Contact, Credit, Date, Debit, Description, Reference, Running Balance, Source. Then also either: Net (single-currency Xero) or Net (Source), Net (USD), Currency (multi-currency Xero)</li>
+                <li>Export as Excel</li>
+              </ol>
+              <div style="margin-top:6px">Tip: save the report settings as a Custom view in Xero to avoid this next time.</div>
+              <div class="divider"></div>
+              <div>Need more detail? <a class="link">See the full guide with screenshots ↗</a></div>
+            </div>
+          </div>
+          <div class="new-wrap" style="margin-top:20px">
+            <span class="new-badge">NEW</span>
+            <div class="hint" style="margin-top:0">One file for all clearing accounts. Synder takes the section of each account from this file. You upload it one time.</div>
+          </div>
+          <div class="dropzone" id="xeroDrop" onclick="xeroUpload()" role="button" tabindex="0">
+            <div class="dz-main">Drag and drop your file here or <a>browse</a></div>
+            <div class="dz-sub">XLS or XLSX formats, up to 100MB</div>
+          </div>
+          <div class="field-error hidden" id="xeroErr">Upload the Account Transactions report to run reconciliation.</div>
+          <div class="hidden" id="xeroFile">
+            <div class="file-info">
+              <span class="xl">XLS</span>
+              <span class="fn">Greenleaf_Account_Transactions_Sep2026.xlsx</span>
+              <span class="fs">0.4 Mb</span>
+              <button type="button" class="del" title="Remove file" onclick="xeroRemove()">×</button>
+            </div>
+            <div class="new-wrap" style="margin-top:18px">
+              <span class="new-badge">NEW</span>
+              <div class="file-accts" id="xeroFileAccts"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="info-box" style="margin-top:16px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span class="status status-ok">Balance reconciliation</span>
           </div>
-          Both balances are pulled automatically from your QuickBooks GL Account register — no extra input needed.
+          <span id="balSrcText">Both balances are pulled automatically from your QuickBooks GL Account register — no extra input needed.</span>
           <div class="hint" style="margin-top:6px"><a class="link">Learn more</a></div>
         </div>
       </div>
@@ -602,15 +687,15 @@
             <label class="scope-opt on" id="optSp">
               <input type="radio" name="scope" value="sp" checked onchange="onScopeChange()">
               <div>
-                <div class="t">Shopify Payments only</div>
-                <div class="d">Today’s behavior — one clearing account (Shopify Payments).</div>
+                <div class="t">One clearing account</div>
+                <div class="d">Select the account below. Shopify Payments gives the same result as today.</div>
               </div>
             </label>
             <label class="scope-opt" id="optAll">
               <input type="radio" name="scope" value="all" onchange="onScopeChange()">
               <div>
                 <div class="t">All clearing accounts of this store</div>
-                <div class="d">Shopify Payments, POS, Manual, and Other — taken from your Shopify sync settings.</div>
+                <div class="d"><span id="allAcctNames">Shopify Payments, POS, Manual, and Other</span> — each account is reconciled in one run.</div>
               </div>
             </label>
           </div>
@@ -620,23 +705,22 @@
         <div class="stack-field" id="singleAccountBlock">
           <label class="label">Account to reconcile<span class="req">*</span></label>
           <select class="select" id="selAccount">
-            <optgroup label="SYNDER ACCOUNTS (AUTOMATED DATA RETRIEVAL)">
-              <option selected>Shopify clearing (required for Synder)</option>
-            </optgroup>
-            <optgroup label="SYNDER ACCOUNTS (ASSISTED RECONCILIATION)">
-              <option>Shopify Manual Orders</option>
-              <option>Shopify Other Orders</option>
-              <option>Shopify POS Orders</option>
+            <optgroup label="SYNDER ACCOUNTS (AUTOMATED DATA RETRIEVAL)" id="ogAuto">
+              <option value="default" selected>Shopify clearing (required for Synder)</option>
+              <option value="pos" id="optPosAcct">Shopify POS Orders</option>
+              <option value="manual">Shopify Manual Orders</option>
+              <option value="other">Shopify Other Orders</option>
             </optgroup>
           </select>
           <div class="hint">Currency: USD</div>
+          <div class="hint">POS, Manual, and Other now use the same data retrieval as Shopify Payments. Only accounts set in your Shopify sync settings are listed.<span class="new-tag">NEW</span></div>
         </div>
 
         <!-- NEW: auto-filled accounts list (All) -->
         <div class="stack-field new-wrap hidden" id="allAccountsBlock">
           <span class="new-badge">NEW</span>
           <label class="label">Accounts to reconcile<span class="req">*</span></label>
-          <div class="hint" style="margin-bottom:8px">From this store’s Shopify Additional Settings. Read-only.</div>
+          <div class="hint" style="margin-bottom:8px">From this store’s Shopify sync settings, as they are when you click Run reconciliation. Read-only. <a class="link">Open Shopify settings</a></div>
           <div class="acct-list">
             <div class="acct-list-row">
               <span class="tab">Shopify Payments</span>
@@ -644,11 +728,11 @@
               <span class="id">1870412</span>
               <span class="chip chip-ok">Ready</span>
             </div>
-            <div class="acct-list-row">
+            <div class="acct-list-row" id="rowPos">
               <span class="tab">POS</span>
-              <span class="name">Shopify POS Orders</span>
-              <span class="id">1870418</span>
-              <span class="chip chip-ok">Ready</span>
+              <span class="name" id="rowPosName">Shopify POS Orders</span>
+              <span class="id" id="rowPosId">1870418</span>
+              <span class="chip chip-ok" id="rowPosChip">Ready</span>
             </div>
             <div class="acct-list-row">
               <span class="tab">Manual</span>
@@ -663,9 +747,9 @@
               <span class="chip chip-ok">Ready</span>
             </div>
           </div>
-          <!-- Warning pattern: shown when a type shares Default (demo off — all separate here). Keep markup for the case. -->
+          <!-- Shown when an order type has no clearing account in settings (demo toggle in the top bar). -->
           <div class="warn-inline hidden" id="fallbackWarn">
-            POS has no separate clearing account in settings — those orders will fall into Shopify Payments.
+            POS has no clearing account in your Shopify sync settings. POS payments will show as <b>Unassigned</b> in the results. <a class="link">Open Shopify settings</a>
           </div>
         </div>
 
@@ -683,7 +767,8 @@
     <div class="footer-note">
       Prototype · layout/labels from synder-ui TransactionReconciliation (ReconciliationCreateHeader, IntegrationSelectAccount, ReconciliationModeSelect, ResultListTabs, …).
       Account <i>names</i> are Synder-style labels — Pharos settings for org 100417 only returned external ids (1870412/16/17/18), not QBO display names.
-      Button label follows live code (<b>Run reconciliation</b>); some Help Center screenshots still show “Start matching”.
+      Button label follows live code (<b>Run reconciliation</b>); some Help Center screenshots still show “Start matching”.<br>
+      v4 (SET-1612): “What to reconcile” = one clearing account (any of the four) or all of them · Xero books side = one Account Transactions upload for all accounts (use the “Books” switch in the top bar) · settings are read when the run starts · available on every plan that has reconciliation.
     </div>
   </div>
 </div>
@@ -708,6 +793,7 @@
       <div class="account-switch">
         <label class="label">Account</label>
         <div class="acct-btns" id="acctBtns" role="tablist" aria-label="Clearing accounts"></div>
+        <div class="hint hidden" id="xeroResNote">Books data for every account comes from one upload: Greenleaf_Account_Transactions_Sep2026.xlsx (Xero).</div>
       </div>
     </div>
 
@@ -836,6 +922,7 @@
       Matched / discrepancy / missing counts marked <span class="ex-note">example</span> are estimates for books-side matching (full TR matcher not re-run).
       Shopify-side payment rows &amp; amounts are from the Sep 2026 reports (org 100417).
       Payouts ($131,184.61 net / 47) apply to Shopify Payments only.<br>
+      v4: single-account runs show that account only (no account buttons, no outside panel). Xero mode reuses the same results; only the books-side source changes.<br>
       v3 additions (rows marked <span class="ex-note">example</span>: PayPal, split POS order, POS cash refund, August-order payment) use figures from a second, per-transaction test store (org 100388, Sep 2026), to show the four rules from that check: PayPal settled outside · split POS payments routed by payment method · refund ID for POS cash refunds · period by payment date.
     </div>
   </div>
@@ -935,7 +1022,7 @@ const DEMO_UNKNOWN = {
   gateway: 'klarna_pay_later',
   count: 2,
   amount: 184.00,
-  reason: 'Needs a mapping — review',
+  reason: 'Unrecognized gateway — needs a clearing account in settings',
   group: 'unknown',
   example: true,
   payments: [
@@ -945,10 +1032,33 @@ const DEMO_UNKNOWN = {
 };
 
 let demoUnknown = false;
+let noPos = false;
+let books = 'qbo';
+let xeroUploaded = false;
+
+const POS_UNASSIGNED = {
+  key: 'pos_unassigned',
+  name: 'POS orders',
+  gateway: 'cash (POS)',
+  count: 63,
+  amount: 2331.48,
+  reason: 'No POS clearing account in your Shopify sync settings',
+  group: 'unknown',
+  example: true,
+  payments: [
+    { date: 'Sep 28, 2026', order: 'POS · pos-cash-…01', gateway: 'cash', amount: 84.00 },
+    { date: 'Sep 22, 2026', order: 'POS · pos-cash-…02', gateway: 'cash', amount: 126.50 },
+    { date: 'Sep 15, 2026', order: 'POS · pos-mix-…03', gateway: 'cash', amount: 19.64 },
+  ],
+};
+
+function unassignedRows() {
+  return [...(noPos ? [POS_UNASSIGNED] : []), ...(demoUnknown ? [DEMO_UNKNOWN] : []), ...OUTSIDE.unknown];
+}
 
 function outsideTotals() {
   const known = [...OUTSIDE.settled, ...OUTSIDE.excluded];
-  const unk = demoUnknown ? [DEMO_UNKNOWN] : OUTSIDE.unknown.slice();
+  const unk = unassignedRows();
   const all = known.concat(unk);
   const count = all.reduce((s, r) => s + r.count, 0);
   const amount = all.reduce((s, r) => s + r.amount, 0);
@@ -982,7 +1092,7 @@ function renderOutsidePanel() {
   const hasUnk = t.unknownCount > 0;
   panel.classList.toggle('has-unknown', hasUnk);
   warn.classList.toggle('hidden', !hasUnk);
-  if (hasUnk) warn.textContent = `${t.unknownCount} unknown`;
+  if (hasUnk) warn.textContent = `${t.unknownCount} unassigned`;
 
   const body = document.getElementById('outsideBody');
   const rowHtml = (r) => {
@@ -1009,10 +1119,10 @@ function renderOutsidePanel() {
       </div>`;
   };
 
-  const unkRows = demoUnknown ? [DEMO_UNKNOWN] : OUTSIDE.unknown.slice();
+  const unkRows = unassignedRows();
   const unkBlock = unkRows.length
     ? unkRows.map(rowHtml).join('')
-    : `<div class="out-empty">No unrecognized gateways this period</div>`;
+    : `<div class="out-empty">No unassigned payments this period</div>`;
 
   body.innerHTML = `
     <div class="out-group">
@@ -1024,7 +1134,7 @@ function renderOutsidePanel() {
       ${OUTSIDE.excluded.map(rowHtml).join('')}
     </div>
     <div class="out-group unknown">
-      <div class="out-group-label">Unknown — Unrecognized gateway</div>
+      <div class="out-group-label">Unassigned — no clearing account in settings<span class="new-tag">NEW</span> · <a class="link">Open Shopify settings</a></div>
       ${unkBlock}
     </div>`;
 }
@@ -1120,7 +1230,8 @@ const ACCOUNTS = {
   }
 };
 
-const ORDER = ['default', 'pos', 'manual', 'other'];
+const ALL_ORDER = ['default', 'pos', 'manual', 'other'];
+let ORDER = ALL_ORDER.slice();
 let modeAll = false;
 let currentAcct = 'default';
 
@@ -1142,18 +1253,98 @@ function onScopeChange() {
   document.getElementById('allAccountsBlock').classList.toggle('hidden', !all);
 }
 
+function acctNames() {
+  return ORDER.map(k => ACCOUNTS[k].tab);
+}
+
+function refreshFormForSettings() {
+  ORDER = noPos ? ALL_ORDER.filter(k => k !== 'pos') : ALL_ORDER.slice();
+  const names = acctNames();
+  document.getElementById('allAcctNames').textContent = names.slice(0, -1).join(', ') + ', and ' + names[names.length - 1];
+  document.getElementById('xeroAcctNames').textContent = names.join(', ');
+  // single-account select: only accounts set in settings
+  const sel = document.getElementById('selAccount');
+  const posOpt = document.getElementById('optPosAcct');
+  posOpt.hidden = noPos; posOpt.disabled = noPos;
+  if (noPos && sel.value === 'pos') sel.value = 'default';
+  // all-accounts list: POS row
+  document.getElementById('rowPos').classList.toggle('missing', noPos);
+  document.getElementById('rowPosName').textContent = noPos ? 'No clearing account' : 'Shopify POS Orders';
+  document.getElementById('rowPosId').textContent = noPos ? '—' : '1870418';
+  const chip = document.getElementById('rowPosChip');
+  chip.className = 'chip ' + (noPos ? 'chip-warn' : 'chip-ok');
+  chip.textContent = noPos ? 'Not set' : 'Ready';
+  document.getElementById('fallbackWarn').classList.toggle('hidden', !noPos);
+  renderXeroFileAccts();
+}
+
+function toggleNoPos(on) {
+  noPos = !!on;
+  refreshFormForSettings();
+  renderOutsidePanel();
+  if (!document.getElementById('screen-results').classList.contains('hidden')) {
+    if (modeAll) runAll(); else showScreen('run');
+  }
+}
+
+function setBooks(v) {
+  books = v;
+  const x = v === 'xero';
+  document.getElementById('accIco').textContent = x ? 'x' : 'qb';
+  document.getElementById('accIco').className = 'platform-ico' + (x ? ' xero' : '');
+  document.getElementById('accIco').title = x ? 'Xero' : 'QuickBooks Online';
+  document.getElementById('accPlatName').textContent = 'Greenleaf Botanicals (' + (x ? 'Xero' : 'QuickBooks Online') + ')';
+  document.getElementById('accMode').innerHTML = x ? '<option>Assisted</option>' : '<option>Automated</option>';
+  document.getElementById('accAutoInfo').classList.toggle('hidden', x);
+  document.getElementById('xeroUploadBlock').classList.toggle('hidden', !x);
+  document.getElementById('balSrcText').textContent = x
+    ? 'Both balances come from the Account Transactions report you upload — no extra input needed.'
+    : 'Both balances are pulled automatically from your QuickBooks GL Account register — no extra input needed.';
+  document.getElementById('xeroErr').classList.add('hidden');
+  showScreen('run');
+}
+
+function renderXeroFileAccts() {
+  const el = document.getElementById('xeroFileAccts');
+  if (!el) return;
+  el.innerHTML = '<div style="margin-bottom:2px;color:var(--grey);font-weight:500">Clearing accounts found in this file:</div>' +
+    ORDER.map(k => `<div>${ACCOUNTS[k].name} (${ACCOUNTS[k].tab})</div>`).join('');
+}
+
+function xeroUpload() {
+  xeroUploaded = true;
+  document.getElementById('xeroDrop').classList.add('hidden');
+  document.getElementById('xeroDrop').classList.remove('err');
+  document.getElementById('xeroErr').classList.add('hidden');
+  document.getElementById('xeroFile').classList.remove('hidden');
+  renderXeroFileAccts();
+}
+
+function xeroRemove() {
+  xeroUploaded = false;
+  document.getElementById('xeroDrop').classList.remove('hidden');
+  document.getElementById('xeroFile').classList.add('hidden');
+}
+
 function onRun() {
   const integ = document.getElementById('selIntegration').value;
   if (!integ) return;
+  if (books === 'xero' && !xeroUploaded) {
+    document.getElementById('xeroErr').classList.remove('hidden');
+    document.getElementById('xeroDrop').classList.add('err');
+    document.getElementById('xeroDrop').scrollIntoView({ block: 'center' });
+    return;
+  }
   modeAll = integ === 'shopify' && document.querySelector('input[name="scope"]:checked').value === 'all';
   if (modeAll) {
     runAll();
   } else {
-    // single-account path — today's results for Default
+    // single-account path — results for the selected account only (Shopify Payments = today's run)
     modeAll = false;
+    const k = integ === 'shopify' ? (document.getElementById('selAccount').value || 'default') : 'default';
+    currentAcct = k;
     populateSwitch(false);
-    currentAcct = 'default';
-    renderAccount(ACCOUNTS.default);
+    renderAccount(ACCOUNTS[k]);
     document.getElementById('bucketStripWrap').classList.add('hidden');
     document.getElementById('acctSwitchWrap').classList.add('hidden');
     showScreen('results');
@@ -1161,6 +1352,7 @@ function onRun() {
 }
 
 function runAll() {
+  if (books === 'xero' && !xeroUploaded) xeroUpload(); // top-bar shortcut: pretend the file is uploaded
   modeAll = true;
   populateSwitch(true);
   currentAcct = 'default';
@@ -1191,7 +1383,7 @@ function populateSwitch(all) {
     ov.dataset.key = 'overview';
     ov.innerHTML = `
       <span class="ab-name">All accounts — overview</span>
-      <span class="ab-meta"><span class="ab-open">4 clearing accounts</span></span>`;
+      <span class="ab-meta"><span class="ab-open">${ORDER.length} clearing accounts</span></span>`;
     ov.onclick = () => selectAccount('overview');
     wrap.appendChild(ov);
   }
@@ -1242,10 +1434,11 @@ function onAccountSwitch() {
 
 function renderOverview() {
   highlightSwitch('overview');
+  document.getElementById('xeroResNote').classList.toggle('hidden', books !== 'xero');
   document.getElementById('resTitle').textContent = 'All clearing accounts';
   document.getElementById('resStatus').className = 'status status-fail';
   document.getElementById('resStatus').textContent = 'Attention required';
-  document.getElementById('resSub').textContent = 'Greenleaf Botanicals (Shopify) / Sep 1 – 30, 2026 · 4 accounts';
+  document.getElementById('resSub').textContent = `Greenleaf Botanicals (Shopify) / Sep 1 – 30, 2026 · ${ORDER.length} accounts`;
   document.getElementById('bucketStripWrap').classList.remove('hidden');
   renderOutsidePanel();
   document.getElementById('balanceBox').classList.add('hidden');
@@ -1277,6 +1470,7 @@ function renderOverview() {
 
 function renderAccount(a) {
   highlightSwitch(a.id);
+  document.getElementById('xeroResNote').classList.toggle('hidden', books !== 'xero');
   document.getElementById('resTitle').textContent = a.name;
   document.getElementById('resStatus').className = 'status ' + a.statusClass;
   document.getElementById('resStatus').textContent = a.status;
@@ -1297,7 +1491,7 @@ function renderAccount(a) {
   setCounts(a.matched, a.disc, a.miss, a.ign);
   document.getElementById('resTable').classList.toggle('with-refund-id', !!a.showRefundId);
   const mm = document.getElementById('settingsMismatchWrap');
-  mm.classList.toggle('hidden', !(modeAll && a.settingsMismatch));
+  mm.classList.toggle('hidden', !a.settingsMismatch);
   if (a.settingsMismatch) document.getElementById('settingsMismatchText').innerHTML = a.settingsMismatch;
 
   const body = document.getElementById('resBody');
@@ -1341,6 +1535,7 @@ function fmt(n) {
 
 // init
 onScopeChange();
+refreshFormForSettings();
 renderOutsidePanel();
 </script>
 </body>
