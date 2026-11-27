@@ -32,15 +32,15 @@
   ];
 
   const PRODUCTS = [
-    { id: "hoodie", name: "Kinipop Hoodie — Navy / M", sku: "KIN-HOOD-NV-M", integration: "shopify", channel: "KINIPOP LLC", cost: 18.4, category: "Apparel" },
-    { id: "beanie", name: "Kinipop Beanie", sku: "KIN-BEAN", integration: "shopify", channel: "KINIPOP LLC", cost: 6.2, category: "Apparel" },
-    { id: "fak", name: "TrueSafety First Aid Kit", sku: "TS-FAK-01", integration: "amazon", channel: "TrueSafety", cost: 9.1, category: "Safety" },
-    { id: "helmet", name: "TrueSafety Helmet", sku: "TS-HELM-PRO", integration: "amazon", channel: "TrueSafety", cost: 22, category: "Safety" },
-    { id: "pad", name: "Invisible Heat Pad", sku: "HEAT-PAD", integration: "shopify", channel: "Invisible Heat", cost: 11.5, category: "Heat" },
-    { id: "mug", name: "Invisible Heat Mug", sku: "IH-MUG-12", integration: "shopify", channel: "Invisible Heat", cost: 4.8, category: "Heat" },
-    { id: "gift", name: "Gift Box", sku: "GIFT-BOX", integration: "shopify", channel: "KINIPOP LLC", cost: 1.2, category: "Packaging" },
-    { id: "tee", name: "Workshop Tee", sku: "TEE-WS-01", integration: "paypal", channel: "Yoav Barazani", cost: 8, category: "Apparel" },
-    { id: "tote", name: "Kinipop Tote", sku: "KIN-TOTE-NAT", integration: "stripe", channel: "KINIPOP LLC", cost: 3.4, category: "Bags" },
+    { id: "hoodie", name: "Kinipop Hoodie — Navy / M", sku: "KIN-HOOD-NV-M", integration: "shopify", channel: "KINIPOP LLC", sale: 48, cost: 18.4, category: "Apparel", verified: true },
+    { id: "beanie", name: "Kinipop Beanie", sku: "KIN-BEAN", integration: "shopify", channel: "KINIPOP LLC", sale: 22, cost: 6.2, category: "Apparel", verified: true },
+    { id: "fak", name: "TrueSafety First Aid Kit", sku: "TS-FAK-01", integration: "amazon", channel: "TrueSafety", sale: 29, cost: 9.1, category: "Safety", verified: true },
+    { id: "helmet", name: "TrueSafety Helmet", sku: "TS-HELM-PRO", integration: "amazon", channel: "TrueSafety", sale: 64, cost: 22, category: "Safety", verified: false },
+    { id: "pad", name: "Invisible Heat Pad", sku: "HEAT-PAD", integration: "shopify", channel: "Invisible Heat", sale: 36, cost: 11.5, category: "Heat", verified: true },
+    { id: "mug", name: "Invisible Heat Mug", sku: "IH-MUG-12", integration: "shopify", channel: "Invisible Heat", sale: 18, cost: 4.8, category: "Heat", verified: false },
+    { id: "gift", name: "Gift Box", sku: "GIFT-BOX", integration: "shopify", channel: "KINIPOP LLC", sale: 6, cost: 1.2, category: "Packaging", verified: true },
+    { id: "tee", name: "Workshop Tee", sku: "TEE-WS-01", integration: "paypal", channel: "Yoav Barazani", sale: 28, cost: 8, category: "Apparel", verified: false },
+    { id: "tote", name: "Kinipop Tote", sku: "KIN-TOTE-NAT", integration: "stripe", channel: "KINIPOP LLC", sale: 16, cost: 3.4, category: "Bags", verified: false },
   ];
 
   const ITEMS = [
@@ -161,6 +161,8 @@
     accounts: {},
     search: "",
     filterIntegration: "all",
+    filterCategory: "all",
+    filterVerified: "all",
     filterMatch: "all",
     selected: {},
     picker: null,
@@ -173,6 +175,7 @@
     findToken: 0,
     highlightId: null,
     syncOpen: { ok: true, fail: true },
+    product: null,
     settingsSection: "products",
     returnPage: "products",
     toast: null,
@@ -315,6 +318,9 @@
     const q = norm(ui.search);
     return allProducts().filter((p) => {
       if (ui.filterIntegration !== "all" && p.integration !== ui.filterIntegration) return false;
+      if (ui.filterCategory !== "all" && p.category !== ui.filterCategory) return false;
+      if (ui.filterVerified === "yes" && !p.verified) return false;
+      if (ui.filterVerified === "no" && p.verified) return false;
       if (q && !norm(p.name + " " + p.sku + " " + p.channel).includes(q)) return false;
       const matched = !!validMatch(p.id);
       if (ui.filterMatch === "matched" && !matched) return false;
@@ -410,23 +416,28 @@
 
   function filtersHtml() {
     const ints = Object.keys(PLATFORMS).map((id) => '<option value="' + id + '"' + (ui.filterIntegration === id ? " selected" : "") + ">" + esc(PLATFORMS[id].name) + "</option>").join("");
-    return '<div class="toolbar"><label class="field grow"><span>Search</span><input type="search" class="search" placeholder="Search by name or SKU" data-input="search" data-focus="search" value="' + esc(ui.search) + '" autocomplete="off"></label>'
-      + '<label class="field"><span>Integration</span><select data-change="filter-integration"><option value="all">All</option>' + ints + "</select></label>"
-      + '<label class="field"><span>Match</span><select data-change="filter-match"><option value="all"' + (ui.filterMatch === "all" ? " selected" : "") + '>All</option><option value="unmatched"' + (ui.filterMatch === "unmatched" ? " selected" : "") + '>Not matched</option><option value="matched"' + (ui.filterMatch === "matched" ? " selected" : "") + ">Matched</option></select></label>"
-      + '<button type="button" class="btn-text" data-act="reset-filters">Reset filters</button></div>';
+    const cats = ["Apparel", "Safety", "Heat", "Packaging", "Bags"].map((c) => '<option value="' + c + '"' + (ui.filterCategory === c ? " selected" : "") + ">" + c + "</option>").join("");
+    return '<div class="filters"><label class="field grow"><span>Search</span><div class="search"><span class="material-icons" style="color:#B4BBCB">search</span><input data-input="search" data-focus="search" placeholder="Search by name or SKU" value="' + esc(ui.search) + '" autocomplete="off"></div></label>'
+      + '<label class="field"><span>Product category</span><select class="ctrl" data-change="filter-category"><option value="all">All</option>' + cats + "</select></label>"
+      + '<label class="field"><span>Imported from</span><select class="ctrl" data-change="filter-integration"><option value="all">All</option>' + ints + "</select></label>"
+      + '<label class="field"><span>Verification status</span><select class="ctrl" data-change="filter-verified"><option value="all"' + (ui.filterVerified === "all" ? " selected" : "") + '>All</option><option value="yes"' + (ui.filterVerified === "yes" ? " selected" : "") + '>Verified</option><option value="no"' + (ui.filterVerified === "no" ? " selected" : "") + ">Unverified</option></select></label>"
+      + '<label class="field"><span>Accounting item</span><select class="ctrl" data-change="filter-match"><option value="all"' + (ui.filterMatch === "all" ? " selected" : "") + '>All</option><option value="unmatched"' + (ui.filterMatch === "unmatched" ? " selected" : "") + '>Not matched</option><option value="matched"' + (ui.filterMatch === "matched" ? " selected" : "") + ">Matched</option></select></label>"
+      + '<button type="button" class="btn-primary" data-act="apply-filters">Apply</button>'
+      + '<button type="button" class="btn-outline" data-act="reset-filters">Reset filters</button></div>';
   }
 
   function bulkHtml() {
-    if (!editorOn()) return "";
     const ids = selectedIds();
     if (!ids.length) return "";
     const unmatched = ids.filter((id) => !validMatch(id));
     const createBulk = state.createItems
       ? '<button type="button" class="btn-primary" data-act="create-selected"' + (unmatched.length ? "" : " disabled") + ">Create in accounting</button>"
       : "";
-    return '<div class="bulk"><span class="count">' + ids.length + " selected</span>"
-      + '<button type="button" class="btn-quiet" data-act="clear-selected">Clear match</button>'
-      + createBulk
+    const inventoryActs = editorOn()
+      ? '<button type="button" class="btn-outline" data-act="clear-selected">Clear match</button>' + createBulk
+      : "";
+    return '<div class="bulk-head"><span>' + ids.length + ' selected</span><div class="btn-group"><button type="button" class="btn-outline" data-act="bulk-verify">Verify</button><button type="button" class="btn-outline" data-act="bulk-revoke">Revoke verification</button></div>'
+      + inventoryActs
       + '<button type="button" class="btn-text" data-act="clear-selection">Clear selection</button></div>';
   }
 
@@ -435,54 +446,52 @@
     const rows = visibleProducts();
     const sage = active && ledger().warehouse;
     const allOn = rows.length > 0 && rows.every((p) => ui.selected[p.id]);
-    let head = "<tr>";
-    if (active) head += '<th style="width:36px"><input class="check" type="checkbox" data-change="select-all"' + (allOn ? " checked" : "") + ' aria-label="Select all"></th>';
-    head += "<th>Name</th><th>SKU</th><th>Integration</th><th class=\"num\">Cost</th><th>Accounting item " + neu() + "</th>";
+    let head = '<tr><th class="chk"><input class="check" type="checkbox" data-change="select-all"' + (allOn ? " checked" : "") + ' aria-label="Select all"></th>'
+      + "<th>Name</th><th>SKU</th><th>Product category</th><th>Imported from</th><th class=\"num\">Sales price</th><th class=\"num\">Cost</th><th>Verification status</th><th>Accounting item</th>";
     if (sage) head += "<th>Warehouse</th>";
-    head += "</tr>";
+    head += "<th></th></tr>";
     let body = "";
+    const cols = 10 + (sage ? 1 : 0);
     if (!rows.length) {
-      const cols = 5 + (active ? 1 : 0) + (sage ? 1 : 0);
       body = '<tr><td colspan="' + cols + '" class="empty">No products match these filters. <button type="button" class="btn-text" data-act="reset-filters">Reset filters</button></td></tr>';
     } else {
       rows.forEach((p) => {
-        const unmatched = state.inventoryTracking && !validMatch(p.id);
-        const flash = ui.highlightId === p.id ? " flash" : "";
-        const cls = (unmatched ? "row-unmatched" : "") + flash;
-        body += '<tr id="prow-' + esc(p.id) + '" class="' + cls + '">';
-        if (active) body += '<td><input class="check" type="checkbox" data-change="select" data-product="' + esc(p.id) + '"' + (ui.selected[p.id] ? " checked" : "") + ' aria-label="Select ' + esc(p.name) + '"></td>';
-        body += '<td><div class="pname">' + esc(p.name) + '</div><div class="muted">' + esc(p.category || "") + "</div></td>";
-        body += '<td class="sku">' + esc(p.sku) + "</td>";
-        body += '<td><div class="who">' + icon(p.integration) + "<div>" + esc(p.channel) + '<span class="muted sub">' + esc(PLATFORMS[p.integration].name) + "</span></div></div></td>";
+        const v = p.verified ? '<span class="status ok">Verified</span>' : '<span class="status warn">Unverified</span>';
+        body += '<tr id="prow-' + esc(p.id) + '" class="data" data-act="open-product" data-product="' + esc(p.id) + '">';
+        body += '<td class="chk" data-stop="1"><input class="check" type="checkbox" data-change="select" data-product="' + esc(p.id) + '"' + (ui.selected[p.id] ? " checked" : "") + ' aria-label="Select ' + esc(p.name) + '"></td>';
+        body += "<td>" + esc(p.name) + "</td>";
+        body += "<td>" + esc(p.sku) + "</td>";
+        body += "<td>" + esc(p.category || "") + "</td>";
+        body += '<td><div class="who">' + icon(p.integration) + esc(p.channel) + "</div></td>";
+        body += '<td class="num">' + money(p.sale || 0) + "</td>";
         body += '<td class="num">' + money(p.cost) + "</td>";
-        body += "<td>" + matchCell(p, active) + "</td>";
-        if (sage) body += "<td>" + warehouseCell(p) + "</td>";
+        body += "<td>" + v + "</td>";
+        body += '<td data-stop="1">' + matchCell(p, active) + "</td>";
+        if (sage) body += '<td data-stop="1">' + warehouseCell(p) + "</td>";
+        body += '<td data-stop="1"><button type="button" class="icon-x" data-act="open-product" data-product="' + esc(p.id) + '" aria-label="Edit">✎</button></td>';
         body += "</tr>";
       });
     }
-    const hint = active
-      ? '<p class="hint">Picking an item saves the match. Find matching products asks you to review before anything is saved. The same match shows on the other version.</p>'
-      : (editor
-        ? '<p class="hint">Turn on inventory tracking to match products to accounting items.</p>'
-        : '<p class="hint">This page shows the match only. Edit it on Mapping → Products. Both versions read the same saved match.</p>');
-    return hint + bulkHtml() + '<div class="table-wrap"><table class="grid"><thead>' + head + "</thead><tbody>" + body + "</tbody></table></div>";
+    const selected = selectedIds();
+    const headRow = selected.length ? "" : "<thead>" + head + "</thead>";
+    return (selected.length ? bulkHtml() : "") + '<div class="table-wrap">' + (selected.length ? "" : "") + '<table class="grid">' + headRow + "<tbody>" + body + '</tbody></table><div class="pager"><span>Rows per page</span><span>10</span><span>1–' + rows.length + " of " + allProducts().length + "</span></div></div>";
   }
 
   function productsPage() {
     const editor = state.version === "a";
     const L = ledger();
     const note = state.inventoryTracking
-      ? "Quantities for matched products are posted to " + L.name + " with each summary. Products that are not matched are skipped, and the summary is marked Attention required."
-      : "COGS for summaries will be calculated according to the costs of the products specified in the list below. If you want to apply costs to existing summaries use the Import option.";
+      ? "Quantities for matched products are posted to " + esc(L.name) + " with each summary. Products that are not matched are skipped, and the summary is marked Attention required."
+      : 'COGS for summaries will be calculated according to the costs of the products specified in the list below. If you want to apply costs to existing summaries use the Import option. <button type="button" class="btn-text" data-act="learn-more">Learn more</button>';
     const find = editor
-      ? '<button type="button" class="btn-primary" data-act="find"' + (ui.finding || !state.inventoryTracking || unmatchedCount() === 0 ? " disabled" : "") + ">" + (ui.finding ? "Looking up items…" : "Find matching products") + neu() + "</button>"
+      ? '<button type="button" class="btn-outline" data-act="find"' + (ui.finding || !state.inventoryTracking || unmatchedCount() === 0 ? " disabled" : "") + ">" + (ui.finding ? "Looking up items…" : "Find matching products") + "</button>"
       : "";
-    return '<div class="page-head"><div><h1>Products and services</h1><p class="note">' + esc(note) + '</p></div><div class="page-actions">'
-      + '<button type="button" class="btn-quiet" data-act="open-import">Import</button>'
-      + '<button type="button" class="btn-quiet" data-act="open-history">See import history</button>'
-      + '<button type="button" class="btn-quiet" data-act="open-export">Export CSV</button>'
-      + '<button type="button" class="btn-quiet" data-act="open-add">Add product</button>'
-      + find + "</div></div>"
+    return '<div class="page-head"><h1>Products and services</h1><div class="page-actions">'
+      + '<button type="button" class="btn-outline" data-act="open-export">Export CSV</button>'
+      + '<button type="button" class="btn-outline" data-act="open-import">Import</button>'
+      + find
+      + '<button type="button" class="btn-primary" data-act="open-add">Add product</button></div></div>'
+      + '<div class="tip"><span class="material-icons">info</span><div>' + (state.inventoryTracking ? esc(note) : note) + "</div></div>"
       + bannerHtml(editor ? "editor" : "badge")
       + filtersHtml()
       + productTable(editor);
@@ -598,7 +607,7 @@
     const intro = state.version === "a"
       ? "Posting accounts for the inventory adjustment, plus the usual summary mappings. Product matching lives on Products."
       : "Posting accounts, summary mappings, and the product match. The Products tab edits the same match the Products page displays.";
-    return '<div class="page-head"><div><h1>Mapping</h1><p class="note">' + esc(intro) + "</p></div></div>"
+    return '<div class="page-head"><div><h1>Mappings list</h1><p class="sub">' + esc(intro) + '</p></div><div class="page-actions"><button type="button" class="btn-text" data-act="add-currency">Full screen</button><button type="button" class="btn-outline" data-act="open-export">Export CSV</button></div></div>'
       + (tab === "accounts" ? bannerHtml("accounts") : "")
       + tabs
       + (tab === "products" ? mappingProducts() : mappingAccounts());
@@ -606,7 +615,7 @@
 
   function syncPage() {
     const L = ledger();
-    return '<div class="page-head"><div><h1>Summaries</h1><p class="note">Example sync results for KINIPOP LLC. Each Daily Summary posts a money ' + esc(L.je.toLowerCase()) + " and, when inventory tracking is on, an " + esc(L.inv.toLowerCase()) + " for matched products.</p></div></div>"
+    return '<div class="page-head"><div><h1>Summaries</h1><p class="sub">Each Daily Summary posts a money ' + esc(L.je.toLowerCase()) + ". With inventory tracking on, a matched product also posts an " + esc(L.inv.toLowerCase()) + '.</p></div><div class="page-actions"><button type="button" class="btn-primary" data-act="open-generate">Generate summary</button></div></div>'
       + syncCard("ok")
       + syncCard("fail");
   }
@@ -653,6 +662,7 @@
     if (page === "products") main = productsPage();
     else if (page === "mapping") main = mappingPage();
     else main = syncPage();
+    main = '<div class="page">' + main + "</div>";
     const side = [
       ["sync", "Summaries"],
       ["products", "Products and services"],
@@ -913,8 +923,16 @@
       + '<div class="dlg-foot"><button type="button" class="btn-quiet" data-act="close-add">Cancel</button><button type="button" class="btn-primary" data-act="save-add">Add product</button></div></div></div>';
   }
 
+  function productModal() {
+    if (!ui.product) return "";
+    const p = productById(ui.product);
+    if (!p) return "";
+    const editor = editorOn();
+    return '<div class="scrim" style="z-index:85" data-act="scrim" data-which="product"><div class="dialog" role="dialog" aria-modal="true" aria-label="Product"><div class="dlg-head"><h2>' + esc(p.name) + '</h2><button type="button" class="close-x" data-act="close-product" aria-label="Close">×</button></div><div class="dlg-body"><div class="form-grid"><label class="field"><span>Name</span><input class="ctrl" value="' + esc(p.name) + '" disabled></label><label class="field"><span>SKU</span><input class="ctrl" value="' + esc(p.sku) + '" disabled></label><label class="field"><span>Product category</span><input class="ctrl" value="' + esc(p.category || "") + '" disabled></label><label class="field"><span>Imported from</span><input class="ctrl" value="' + esc(p.channel) + '" disabled></label><label class="field"><span>Sales price</span><input class="ctrl" value="' + money(p.sale || 0) + '" disabled></label><label class="field"><span>Cost</span><input class="ctrl" value="' + money(p.cost) + '" disabled></label></div><p class="hint" style="margin-top:12px">Verification status: ' + (p.verified ? "Verified" : "Unverified") + ".</p><h3 style=\"font-size:16px;font-weight:500;margin:16px 0 8px\">Accounting inventory</h3>" + matchCell(p, editor) + "</div><div class=\"dlg-foot\"><button type=\"button\" class=\"btn-primary\" data-act=\"close-product\">Close</button></div></div></div>";
+  }
+
   function modalsHtml() {
-    return settingsModal() + reviewModal() + createModal() + infoModal() + addModal() + confirmModal();
+    return settingsModal() + reviewModal() + createModal() + productModal() + infoModal() + addModal() + confirmModal();
   }
 
   function positionPicker() {
@@ -1120,6 +1138,8 @@
   function applyChange(el) {
     const key = el.dataset.change;
     if (key === "filter-integration") ui.filterIntegration = el.value;
+    else if (key === "filter-category") ui.filterCategory = el.value;
+    else if (key === "filter-verified") ui.filterVerified = el.value;
     else if (key === "filter-match") ui.filterMatch = el.value;
     else if (key === "warehouse") {
       const m = state.matches[el.dataset.product];
@@ -1145,6 +1165,12 @@
   }
 
   function onClick(e) {
+    const row = e.target.closest("tr[id^='prow-']");
+    if (row && !e.target.closest("[data-stop], button, input, select, textarea, a, label")) {
+      ui.product = row.id.replace("prow-", "");
+      render();
+      return;
+    }
     const actEl = e.target.closest("[data-act]");
     const act = actEl ? actEl.dataset.act : null;
     const inPicker = e.target.closest(".picker");
@@ -1162,6 +1188,7 @@
       if (which === "confirm") ui.confirm = null;
       if (which === "info") ui.info = null;
       if (which === "add") ui.add = null;
+      if (which === "product") ui.product = null;
       render();
       return;
     }
@@ -1217,7 +1244,7 @@
       return;
     }
     if (act === "reset-filters") {
-      ui.search = ""; ui.filterIntegration = "all"; ui.filterMatch = "all"; render(); return;
+      ui.search = ""; ui.filterIntegration = "all"; ui.filterCategory = "all"; ui.filterVerified = "all"; ui.filterMatch = "all"; render(); return;
     }
     if (act === "open-picker") {
       if (!state.inventoryTracking) { toast("Turn on inventory tracking in Settings first."); render(); return; }
@@ -1295,6 +1322,22 @@
       render();
       return;
     }
+    if (act === "apply-filters") { render(); return; }
+    if (act === "bulk-verify" || act === "bulk-revoke") {
+      const on = act === "bulk-verify";
+      selectedIds().forEach((id) => { const p = productById(id); if (p) p.verified = on; });
+      ui.selected = {};
+      toast(on ? "The product was verified." : "The product was not verified.");
+      render();
+      return;
+    }
+    if (act === "open-product") { ui.product = actEl.dataset.product; render(); return; }
+    if (act === "close-product") { ui.product = null; render(); return; }
+    if (act === "open-generate") {
+      ui.info = { title: "Generate summary", html: "<p>Generating a summary is unchanged. The two rows on this page are examples of a synced inventory adjustment and an adjustment that needs attention.</p>" };
+      render();
+      return;
+    }
     if (act === "open-add") { ui.add = { name: "", sku: "", integration: "shopify", cost: "0", error: "" }; render(); return; }
     if (act === "close-add") { ui.add = null; render(); return; }
     if (act === "save-add") {
@@ -1302,7 +1345,7 @@
       const sku = ui.add.sku.trim();
       if (!name || !sku) { ui.add.error = "Name and SKU are required."; render(); return; }
       const id = "custom-" + Date.now();
-      state.customProducts.push({ id: id, name: name, sku: sku, integration: ui.add.integration, channel: "KINIPOP LLC", cost: Number(ui.add.cost) || 0, category: "Custom" });
+      state.customProducts.push({ id: id, name: name, sku: sku, integration: ui.add.integration, channel: "KINIPOP LLC", sale: 0, cost: Number(ui.add.cost) || 0, category: "Custom", verified: false });
       save();
       ui.add = null;
       ui.highlightId = id;
@@ -1391,6 +1434,7 @@
     if (e.key !== "Escape") return;
     if (ui.confirm) ui.confirm = null;
     else if (ui.create) ui.create = null;
+    else if (ui.product) ui.product = null;
     else if (ui.add) ui.add = null;
     else if (ui.info) ui.info = null;
     else if (ui.review) ui.review = null;

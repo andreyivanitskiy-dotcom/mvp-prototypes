@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DIS-507 — UX notes</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>body { font-family: Inter, system-ui, sans-serif; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<main class="max-w-3xl mx-auto px-6 py-14">
+  <a href="./" class="text-sm text-slate-500 hover:text-slate-800">&larr; Inventory tracking</a>
+  <h1 class="text-2xl font-bold text-slate-900 mt-4">Where inventory matching should live</h1>
+  <p class="mt-3 text-slate-600">Daily Summary already has a product list, a mapping grid, and a verification pattern that blocks a summary until a person fixes it. Inventory tracking should reuse those, not add a new screen.</p>
+
+  <h2 class="text-lg font-semibold mt-8">Recommendation: Version A</h2>
+  <p class="mt-2">Edit the accounting-item match on <b>Products and services</b>. Keep Mapping for the accounts the adjustment posts to, plus a banner when products are still not matched. Store the match once, so both pages show the same result.</p>
+  <p class="mt-2">Version B is in the prototype so the two can be compared. It puts the same editor on a Products tab inside Mapping. That is workable, and it is the worse home for the job.</p>
+
+  <h2 class="text-lg font-semibold mt-8">Why Products, not Mapping</h2>
+  <ul class="mt-2 list-disc pl-5 space-y-2">
+    <li>A product row exists before any summary is imported. Mapping rows show up only after the first summaries, and only for the current grouping.</li>
+    <li>The Products table is already one row per sales product, with name, SKU, category, and the integration it was imported from. Mapping rows are groups, and they repeat per integration and currency.</li>
+    <li>People already come to Products to fix verification. Unmatched inventory is the same kind of problem: a product property that decides whether a summary can finish.</li>
+  </ul>
+
+  <h2 class="text-lg font-semibold mt-8">Placement, using what is already there</h2>
+  <ul class="mt-2 list-disc pl-5 space-y-2">
+    <li><b>Accounting item column</b> sits after Verification status. Both are a status of the product. Empty state is the same control Mapping uses for an unmapped account: “Select accounting item”.</li>
+    <li><b>Accounting item filter</b> sits in the existing gray filter bar, next to Verification status, with All / Not matched / Matched. Apply and Reset filters stay where they are.</li>
+    <li><b>Find matching products</b> is an outlined action beside Import. Add product stays the blue button. Auto-match does not save until the person reviews matched, several candidates, or no match.</li>
+    <li><b>Bulk bar</b> replaces the column titles when rows are selected, the way Verify and Revoke verification already do. Clear match and Create in accounting join that bar. They do not get a second toolbar.</li>
+    <li><b>Not matched banner</b> uses the same warning treatment as “Attention required” on Summaries. It says those quantities will not be adjusted, and offers Show not matched.</li>
+    <li><b>Row click</b> still opens the product, as it does today. The accounting item is in that dialog as well as in the column.</li>
+    <li><b>Settings.</b> Inventory tracking is a card above COGS on Products and services, the same card pattern as Unverified products. Turning it on switches the COGS rows off and disables them, with the reason on the card. The page note then changes from cost calculation to quantity posting.</li>
+    <li><b>Mapping</b> keeps “Mappings list”, the account grid, and a banner that links to Products. Posting accounts (adjustment account, entity, warehouse, subsidiary) sit in a card above the grid, because they are account setup, not a product match.</li>
+    <li><b>Summaries</b> keep the sync-status chip. A period can be Synced for the journal entry and Attention required for the inventory adjustment, with the reason under the documents.</li>
+    <li><b>Create in accounting</b> is optional in the demo bar. On, it is a row link, a bulk action, a dialog for QuickBooks Online and Xero, and “Currently in development” plus “I need this” for Sage Intacct and NetSuite. Off, those controls disappear and matching stays manual or via Find matching products.</li>
+  </ul>
+
+  <h2 class="text-lg font-semibold mt-8">First run</h2>
+  <p class="mt-2">Inventory tracking starts off until someone turns it on in Settings. The Products note and the banner explain that quantities are not posting yet. After it is on, unmatched products are visible immediately: warning banner, Not matched filter, and empty item fields. One product in the sample is already matched, so the column is not an empty mystery.</p>
+
+  <p class="mt-8 text-sm text-slate-500">Sample data only. The layout follows the live Products, Mapping, Summaries, and Products and services settings screens.</p>
+</main>
+</body>
+</html>
