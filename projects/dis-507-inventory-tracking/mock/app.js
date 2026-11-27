@@ -120,6 +120,7 @@
       posting: defaultPosting(),
       customProducts: [],
       feedbackSent: {},
+      createItems: true,
       lastEdit: { productId: "beanie", text: "Kinipop Beanie → Kinipop Beanie" },
     };
   }
@@ -142,6 +143,7 @@
         posting: posting,
         customProducts: Array.isArray(raw.customProducts) ? raw.customProducts : [],
         feedbackSent: raw.feedbackSent || {},
+        createItems: raw.createItems === false ? false : true,
         lastEdit: raw.lastEdit || base.lastEdit,
       });
     } catch (e) {
@@ -278,6 +280,7 @@
       posting: state.posting,
       customProducts: state.customProducts,
       feedbackSent: state.feedbackSent,
+      createItems: state.createItems,
       lastEdit: state.lastEdit,
     }));
   }
@@ -387,9 +390,14 @@
     }
     if (raw && raw.missing) {
       const where = raw.scope ? LEDGERS[raw.scope].name : "another ledger";
-      return '<div class="unmatched-actions"><button type="button" class="select-placeholder" data-act="open-picker" data-product="' + esc(p.id) + '" data-picker-for="' + esc(p.id) + '">Select accounting item</button><button type="button" class="btn-text slim" data-act="create-one" data-product="' + esc(p.id) + '">Create</button></div><div class="cell-warn">Saved in ' + esc(where) + ": " + esc(raw.itemName) + ". Not in " + esc(ledger().name) + ".</div>";
+      return '<div class="unmatched-actions"><button type="button" class="select-placeholder" data-act="open-picker" data-product="' + esc(p.id) + '" data-picker-for="' + esc(p.id) + '">Select accounting item</button>' + createLink(p.id) + '</div><div class="cell-warn">Saved in ' + esc(where) + ": " + esc(raw.itemName) + ". Not in " + esc(ledger().name) + ".</div>";
     }
-    return '<div class="unmatched-actions"><button type="button" class="select-placeholder" data-act="open-picker" data-product="' + esc(p.id) + '" data-picker-for="' + esc(p.id) + '">Select accounting item</button><button type="button" class="btn-text slim" data-act="create-one" data-product="' + esc(p.id) + '">Create</button></div>';
+    return '<div class="unmatched-actions"><button type="button" class="select-placeholder" data-act="open-picker" data-product="' + esc(p.id) + '" data-picker-for="' + esc(p.id) + '">Select accounting item</button>' + createLink(p.id) + "</div>";
+  }
+
+  function createLink(productId) {
+    if (!state.createItems) return "";
+    return '<button type="button" class="btn-text slim" data-act="create-one" data-product="' + esc(productId) + '">Create</button>';
   }
 
   function warehouseCell(p) {
@@ -413,9 +421,12 @@
     const ids = selectedIds();
     if (!ids.length) return "";
     const unmatched = ids.filter((id) => !validMatch(id));
+    const createBulk = state.createItems
+      ? '<button type="button" class="btn-primary" data-act="create-selected"' + (unmatched.length ? "" : " disabled") + ">Create in accounting</button>"
+      : "";
     return '<div class="bulk"><span class="count">' + ids.length + " selected</span>"
       + '<button type="button" class="btn-quiet" data-act="clear-selected">Clear match</button>'
-      + '<button type="button" class="btn-primary" data-act="create-selected"' + (unmatched.length ? "" : " disabled") + ">Create in accounting</button>"
+      + createBulk
       + '<button type="button" class="btn-text" data-act="clear-selection">Clear selection</button></div>';
   }
 
@@ -515,7 +526,7 @@
     const extra = state.ledger === "sage"
       ? " Entity and warehouse are required for the Sage adjustment. A product can override the warehouse on its match."
       : "";
-    const dev = L.canCreate ? "" : " Creating items in " + L.name + " is currently in development.";
+    const dev = state.createItems && !L.canCreate ? " Creating items in " + L.name + " is currently in development." : "";
     const locked = state.inventoryTracking ? "" : " These accounts are used once inventory tracking is on.";
     return '<section class="card"><h2>Inventory posting ' + neu() + '</h2><p class="desc">Accounts Synder uses when it posts the inventory adjustment to ' + esc(L.name) + ". " + where + extra + dev + locked + '</p><div class="post-grid">' + fields + "</div></section>";
   }
@@ -659,6 +670,7 @@
     const versions = [["a", "A · Products page"], ["b", "B · Mapping page"]];
     const vHtml = versions.map(([id, label]) => '<button type="button" data-act="set-version" data-v="' + id + '"' + (state.version === id ? ' class="on"' : "") + ">" + label + "</button>").join("");
     const lHtml = Object.keys(LEDGERS).map((id) => '<button type="button" data-act="set-ledger" data-ledger="' + id + '"' + (state.ledger === id ? ' class="on"' : "") + ">" + esc(LEDGERS[id].short) + "</button>").join("");
+    const cHtml = ["true", "false"].map((v) => '<button type="button" data-act="set-create" data-on="' + v + '"' + (state.createItems === (v === "true") ? ' class="on"' : "") + ">" + v + "</button>").join("");
     const other = state.version === "a" ? "Version B" : "Version A";
     const blurb = state.version === "a"
       ? "Version A edits the match on Products. Mapping keeps posting accounts and a banner."
@@ -667,6 +679,7 @@
     return '<div class="proto-row"><a href="../../">All prototypes</a><span class="sep"></span><span class="title">DIS-507 Inventory tracking</span>'
       + '<span class="sep"></span><span class="seg" role="group" aria-label="Version">' + vHtml + "</span>"
       + '<span class="seg" role="group" aria-label="Ledger">' + lHtml + "</span>"
+      + '<span class="lbl">Create items:</span><span class="seg" role="group" aria-label="Create items">' + cHtml + "</span>"
       + '<span style="flex:1"></span><button type="button" class="textish" data-act="reset">Reset demo</button></div>'
       + '<div class="strip"><span class="grow">' + blurb + " " + esc(saved) + " Books: " + esc(ledger().name) + '.</span>'
       + '<button type="button" class="linkish" data-act="see-other">See it on ' + other + "</button></div>";
@@ -698,7 +711,7 @@
     }
     const raw = rawMatch(p.id);
     const clearBtn = raw && !raw.missing ? '<button type="button" class="btn-text" data-act="clear-one" data-product="' + esc(p.id) + '">Clear match</button>' : "<span></span>";
-    const createBtn = !validMatch(p.id) ? '<button type="button" class="btn-text" data-act="create-one" data-product="' + esc(p.id) + '">Create in accounting</button>' : "";
+    const createBtn = state.createItems && !validMatch(p.id) ? '<button type="button" class="btn-text" data-act="create-one" data-product="' + esc(p.id) + '">Create in accounting</button>' : "";
     return '<div class="picker" role="listbox"><input data-focus="picker" data-input="picker" placeholder="Search name or SKU" value="' + esc(ui.picker.query || "") + '" autocomplete="off"><div class="picker-list">' + list + '</div><div class="picker-foot">' + clearBtn + createBtn + "</div></div>";
   }
 
@@ -788,7 +801,8 @@
       body += '<div class="rev-sec"><h3>No match</h3>';
       groups.none.forEach((r) => {
         const p = productById(r.productId);
-        body += '<div class="rev-row none"><div><div class="pname">' + esc(p.name) + '</div><div class="muted">' + esc(p.sku) + '</div></div><div class="muted">No accounting item with this name or SKU.</div><button type="button" class="btn-outline" data-act="create-one" data-product="' + esc(p.id) + '">Create in accounting</button></div>';
+        const createBtn = state.createItems ? '<button type="button" class="btn-outline" data-act="create-one" data-product="' + esc(p.id) + '">Create in accounting</button>' : "";
+        body += '<div class="rev-row none"><div><div class="pname">' + esc(p.name) + '</div><div class="muted">' + esc(p.sku) + '</div></div><div class="muted">No accounting item with this name or SKU.</div>' + createBtn + "</div>";
       });
       body += "</div>";
     }
@@ -961,6 +975,7 @@
   }
 
   function openCreate(ids) {
+    if (!state.createItems) return;
     const list = ids.filter((id) => productById(id) && !validMatch(id));
     if (!state.inventoryTracking) {
       toast("Turn on inventory tracking in Settings first.");
@@ -1167,6 +1182,15 @@
       render();
       return;
     }
+    if (act === "set-create") {
+      state.createItems = actEl.dataset.on === "true";
+      setQuery("create", state.createItems ? "true" : "false");
+      if (!state.createItems) ui.create = null;
+      ui.picker = null;
+      save();
+      render();
+      return;
+    }
     if (act === "see-other") { seeOther(); return; }
     if (act === "reset") { ui.confirm = "reset"; render(); return; }
     if (act === "open-settings") {
@@ -1183,7 +1207,7 @@
       return;
     }
     if (act === "help") {
-      ui.info = { title: "About this prototype", html: "<p>DIS-507 adds an inventory adjustment next to the Daily Summary journal entry. Match each sales product to an inventory item. The match is stored once, so Version A and Version B show the same result.</p><p>QuickBooks Online and Xero can create an item. Sage Intacct and NetSuite show Currently in development.</p>" };
+      ui.info = { title: "About this prototype", html: "<p>DIS-507 adds an inventory adjustment next to the Daily Summary journal entry. Match each sales product to an inventory item. The match is stored once, so Version A and Version B show the same result.</p>" + (state.createItems ? "<p>Create items is on. QuickBooks Online and Xero can create an item. Sage Intacct and NetSuite show Currently in development.</p>" : "<p>Create items is off. Match products from the list, or use Find matching products.</p>") };
       render();
       return;
     }
@@ -1391,6 +1415,7 @@
     state = loadState();
     state.version = version;
     state.ledger = ledgerId;
+    if (!state.createItems) ui.create = null;
     render();
   });
 
@@ -1398,6 +1423,7 @@
     const params = new URLSearchParams(location.search);
     if (params.get("v") === "a" || params.get("v") === "b") state.version = params.get("v");
     if (LEDGERS[params.get("ledger")]) state.ledger = params.get("ledger");
+    if (params.get("create") === "true" || params.get("create") === "false") state.createItems = params.get("create") === "true";
     if (params.get("tab") === "products" && state.version === "b") ui.mappingTab = "products";
     const h = (location.hash || "").replace("#", "");
     if (["products", "mapping", "sync", "settings"].indexOf(h) !== -1) ui.page = h;
